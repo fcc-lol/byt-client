@@ -241,7 +241,7 @@ function App() {
   const [offset, setOffset] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const [swiping, setSwiping] = useState(false);
-  const [dragStart, setDragStart] = useState(null);
+  const [mouseStart, setMouseStart] = useState(null);
   const cardWidth = 1920;
   const numCards = 3;
   const currentCard = Math.round(-offset / cardWidth);
@@ -252,74 +252,65 @@ function App() {
     setTimeout(() => setTransitioning(false), 500);
   };
 
-  const bind = useGesture(
-    {
-      onDragStart: ({ event }) => {
-        const target = event.target;
-        const isInteractive =
-          target.tagName.toLowerCase() === "button" ||
-          target.tagName.toLowerCase() === "input" ||
-          target.closest("button") ||
-          target.closest("input");
+  const handleMouseDown = (e) => {
+    const target = e.target;
+    const isInteractive =
+      target.tagName.toLowerCase() === "button" ||
+      target.tagName.toLowerCase() === "input" ||
+      target.closest("button") ||
+      target.closest("input");
 
-        if (isInteractive) return;
+    if (isInteractive) return;
 
-        setSwiping(true);
-        setDragStart(offset);
-        setTransitioning(false);
-      },
-      onDrag: ({ movement: [mx], event }) => {
-        const target = event.target;
-        const isInteractive =
-          target.tagName.toLowerCase() === "button" ||
-          target.tagName.toLowerCase() === "input" ||
-          target.closest("button") ||
-          target.closest("input");
+    setMouseStart({
+      x: e.clientX,
+      offset: offset
+    });
+    setSwiping(true);
+    setTransitioning(false);
+  };
 
-        if (isInteractive || dragStart === null) return;
+  const handleMouseMove = (e) => {
+    if (!mouseStart) return;
 
-        const newOffset = dragStart + mx;
-        setOffset(
-          Math.min(0, Math.max(-cardWidth * (numCards - 1), newOffset))
-        );
-      },
-      onDragEnd: ({ movement: [mx], event }) => {
-        const target = event.target;
-        const isInteractive =
-          target.tagName.toLowerCase() === "button" ||
-          target.tagName.toLowerCase() === "input" ||
-          target.closest("button") ||
-          target.closest("input");
+    const currentX = e.clientX;
+    const diff = currentX - mouseStart.x;
+    const newOffset = mouseStart.offset + diff;
 
-        if (isInteractive) {
-          setSwiping(false);
-          setDragStart(null);
-          return;
-        }
+    setOffset(Math.min(0, Math.max(-cardWidth * (numCards - 1), newOffset)));
+  };
 
-        setSwiping(false);
-        setDragStart(null);
-        setTransitioning(true);
+  const handleMouseUp = (e) => {
+    if (!mouseStart) return;
 
-        const threshold = cardWidth * 0.2; // 20% of card width
-        let targetCard = currentCard;
+    const diff = e.clientX - mouseStart.x;
+    setSwiping(false);
+    setTransitioning(true);
 
-        if (Math.abs(mx) > threshold) {
-          targetCard = mx > 0 ? currentCard - 1 : currentCard + 1;
-          targetCard = Math.max(0, Math.min(numCards - 1, targetCard));
-        }
+    // Simple threshold-based card change (15% of card width)
+    const threshold = cardWidth * 0.15;
+    let targetCard = currentCard;
 
-        setOffset(-targetCard * cardWidth);
-        setTimeout(() => setTransitioning(false), 500);
-      }
-    },
-    {
-      drag: {
-        filterTaps: true,
-        threshold: 5
-      }
+    if (Math.abs(diff) > threshold) {
+      targetCard = diff > 0 ? currentCard - 1 : currentCard + 1;
+      targetCard = Math.max(0, Math.min(numCards - 1, targetCard));
     }
-  );
+
+    setOffset(-targetCard * cardWidth);
+    setMouseStart(null);
+    setTimeout(() => setTransitioning(false), 500);
+  };
+
+  // Handle case where mouse leaves the window
+  const handleMouseLeave = () => {
+    if (mouseStart) {
+      setSwiping(false);
+      setMouseStart(null);
+      setTransitioning(true);
+      setOffset(-currentCard * cardWidth);
+      setTimeout(() => setTransitioning(false), 500);
+    }
+  };
 
   const handleRefresh = () => {
     window.location.reload();
@@ -334,7 +325,10 @@ function App() {
         Refresh
       </RefreshButton>
       <CarouselContainer
-        {...bind()}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         $offset={offset}
         $transitioning={transitioning}
         $swiping={swiping}
