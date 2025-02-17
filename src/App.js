@@ -1,145 +1,105 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { useGesture } from "@use-gesture/react";
+import React, { useState, useEffect } from "react";
+import styled, { createGlobalStyle } from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faRotate
+} from "@fortawesome/free-solid-svg-icons";
+import { Counter } from "./components/Counter";
+import { TodoList } from "./components/TodoList";
+import { ColorPicker } from "./components/ColorPicker";
+
+const GlobalStyle = createGlobalStyle`
+  ${(props) =>
+    props.$hidePointer &&
+    `
+    * {
+      cursor: none !important;
+    }
+  `}
+`;
 
 const Page = styled.div`
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 480px;
+  justify-content: center;
+  height: 100vh;
   width: 100vw;
-  overflow: hidden;
-  background: #f5f5f5;
+  background: #000000;
   position: fixed;
   top: 0;
   left: 0;
 `;
 
-const CarouselContainer = styled.div`
+const MainContainer = styled.div`
   display: flex;
-  transform: translateX(${(props) => props.$offset}px);
-  transition: transform
-    ${(props) =>
-      props.$transitioning ? "0.5s cubic-bezier(0.4, 0, 0.2, 1)" : "0s"};
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 100%;
   width: 100%;
-  position: relative;
-
-  &:after {
-    content: "← Swipe →";
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    pointer-events: none;
-    opacity: ${(props) => (props.$swiping ? 0 : 0.7)};
-    transition: opacity 0.3s;
-  }
 `;
 
-const NavigationDots = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  position: absolute;
-  bottom: 20px;
-`;
-
-const Dot = styled.div`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: ${(props) => (props.$active ? "#007bff" : "#ccc")};
-  transition: background 0.3s, transform 0.3s;
-  cursor: pointer;
-
-  &:hover {
-    transform: scale(1.2);
-  }
-`;
-
-const Card = styled.div`
-  min-width: 1920px;
-  width: 1920px;
-  height: 480px;
-  margin: 0;
+const AppContent = styled.div`
   background: white;
+  border-radius: 2rem;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  user-select: none;
-  padding: 20px;
-  box-sizing: border-box;
+  align-items: center;
 
-  h2 {
-    margin-bottom: 1rem;
-    font-size: 2rem;
-  }
-
-  button {
-    padding: 0.8rem 1.5rem;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    border: none;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    &:hover {
-      background: #0056b3;
-    }
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    font-size: 1.2rem;
-    li {
-      margin: 0.5rem 0;
-    }
-  }
-
-  input[type="color"] {
-    width: 80px;
-    height: 80px;
-    border: none;
-    border-radius: 8px;
-    margin: 0.5rem;
-  }
-
-  p {
-    font-size: 1.2rem;
-    margin: 0.5rem;
+  > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 `;
 
-const HorizontalLayout = styled.div`
+const NavButton = styled.button`
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  width: 8rem;
+  height: 100vh;
+  border-radius: 2rem;
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+  flex-shrink: 0;
 
-  > * {
-    margin: 0 1rem;
+  &:active {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
   }
 `;
 
 const RefreshButton = styled.button`
   position: fixed;
-  top: 20px;
-  left: 20px;
-  padding: 8px 16px;
-  font-size: 14px;
+  top: 1.25rem;
+  left: 1.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  color: red;
   border: none;
-  border-radius: 20px;
+  border-radius: 1.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
   transition: all 0.3s ease;
   z-index: 1000;
 
@@ -152,225 +112,47 @@ const RefreshButton = styled.button`
   }
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    height: 1rem;
   }
 `;
 
-const DebugOverlay = styled.div`
-  position: fixed;
-  top: 70px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 12px;
-  z-index: 1000;
-  max-width: 300px;
-  word-wrap: break-word;
+export const HorizontalLayout = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  justify-content: center;
+
+  > * {
+    margin: 0 1rem;
+  }
 `;
 
-// Example Components
-const Counter = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <div>
-      <h2>Counter App</h2>
-      <HorizontalLayout>
-        <p>Count: {count}</p>
-        <button onClick={() => setCount(count + 1)}>Increment</button>
-      </HorizontalLayout>
-    </div>
-  );
-};
-
-const TodoList = () => {
-  const [todos, setTodos] = useState(["Learn React", "Build Apps"]);
-  const [newTodo, setNewTodo] = useState("");
-
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      setTodos([...todos, newTodo.trim()]);
-      setNewTodo("");
-    }
-  };
-
-  return (
-    <div>
-      <h2>Todo List</h2>
-      <HorizontalLayout>
-        <ul style={{ display: "flex", gap: "2rem" }}>
-          {todos.map((todo, index) => (
-            <li key={index}>{todo}</li>
-          ))}
-        </ul>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <input
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            placeholder="New todo"
-            style={{
-              padding: "0.8rem",
-              fontSize: "1.2rem",
-              borderRadius: "8px",
-              border: "1px solid #ccc"
-            }}
-          />
-          <button onClick={addTodo}>Add Todo</button>
-        </div>
-      </HorizontalLayout>
-    </div>
-  );
-};
-
-const ColorPicker = () => {
-  const [color, setColor] = useState("#ff0000");
-  return (
-    <div>
-      <h2>Color Picker</h2>
-      <HorizontalLayout>
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-        />
-        <p>Selected: {color}</p>
-        <div
-          style={{
-            width: "100px",
-            height: "100px",
-            background: color,
-            borderRadius: "8px",
-            border: "2px solid #ccc"
-          }}
-        />
-      </HorizontalLayout>
-    </div>
-  );
-};
-
 function App() {
-  const [offset, setOffset] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-  const [swiping, setSwiping] = useState(false);
-  const [mouseStart, setMouseStart] = useState(null);
-  const [debugInfo, setDebugInfo] = useState({
-    lastEvent: "none",
-    mouseX: 0,
-    startX: 0,
-    diff: 0
-  });
-  const cardWidth = 1920;
-  const numCards = 3;
-  const currentCard = Math.round(-offset / cardWidth);
+  const [currentApp, setCurrentApp] = useState(0);
+  const [isDevice, setIsDevice] = useState(false);
 
-  const navigateToCard = (index) => {
-    setTransitioning(true);
-    setOffset(-index * cardWidth);
-    setTimeout(() => setTransitioning(false), 500);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsDevice(params.get("onDevice") === "true");
+  }, []);
+
+  const apps = [
+    { name: "Counter", component: <Counter /> },
+    { name: "Todo List", component: <TodoList /> },
+    { name: "Color Picker", component: <ColorPicker /> }
+  ];
+
+  const handlePrevious = () => {
+    if (currentApp > 0) {
+      setCurrentApp(currentApp - 1);
+    }
   };
 
-  const handleMouseDown = (e) => {
-    const target = e.target;
-    const isInteractive =
-      target.tagName.toLowerCase() === "button" ||
-      target.tagName.toLowerCase() === "input" ||
-      target.closest("button") ||
-      target.closest("input");
-
-    if (isInteractive) {
-      setDebugInfo((prev) => ({
-        ...prev,
-        lastEvent: "mouseDown (ignored - interactive)",
-        mouseX: e.clientX
-      }));
-      return;
-    }
-
-    setMouseStart({
-      x: e.clientX,
-      offset: offset
-    });
-    setSwiping(true);
-    setTransitioning(false);
-    setDebugInfo((prev) => ({
-      ...prev,
-      lastEvent: "mouseDown",
-      mouseX: e.clientX,
-      startX: e.clientX
-    }));
-  };
-
-  const handleMouseMove = (e) => {
-    if (!mouseStart) {
-      setDebugInfo((prev) => ({
-        ...prev,
-        lastEvent: "mouseMove (ignored - no start)",
-        mouseX: e.clientX
-      }));
-      return;
-    }
-
-    const currentX = e.clientX;
-    const diff = currentX - mouseStart.x;
-    const newOffset = mouseStart.offset + diff;
-
-    setOffset(Math.min(0, Math.max(-cardWidth * (numCards - 1), newOffset)));
-    setDebugInfo((prev) => ({
-      ...prev,
-      lastEvent: "mouseMove",
-      mouseX: currentX,
-      diff
-    }));
-  };
-
-  const handleMouseUp = (e) => {
-    if (!mouseStart) {
-      setDebugInfo((prev) => ({
-        ...prev,
-        lastEvent: "mouseUp (ignored - no start)",
-        mouseX: e.clientX
-      }));
-      return;
-    }
-
-    const diff = e.clientX - mouseStart.x;
-    setSwiping(false);
-    setTransitioning(true);
-
-    const threshold = cardWidth * 0.15;
-    let targetCard = currentCard;
-
-    if (Math.abs(diff) > threshold) {
-      targetCard = diff > 0 ? currentCard - 1 : currentCard + 1;
-      targetCard = Math.max(0, Math.min(numCards - 1, targetCard));
-    }
-
-    setOffset(-targetCard * cardWidth);
-    setMouseStart(null);
-    setDebugInfo((prev) => ({
-      ...prev,
-      lastEvent: `mouseUp (diff: ${diff}, threshold: ${threshold})`,
-      mouseX: e.clientX,
-      diff
-    }));
-    setTimeout(() => setTransitioning(false), 500);
-  };
-
-  const handleMouseLeave = () => {
-    if (mouseStart) {
-      setSwiping(false);
-      setMouseStart(null);
-      setTransitioning(true);
-      setOffset(-currentCard * cardWidth);
-      setDebugInfo((prev) => ({
-        ...prev,
-        lastEvent: "mouseLeave"
-      }));
-      setTimeout(() => setTransitioning(false), 500);
+  const handleNext = () => {
+    if (currentApp < apps.length - 1) {
+      setCurrentApp(currentApp + 1);
     }
   };
 
@@ -379,51 +161,27 @@ function App() {
   };
 
   return (
-    <Page>
-      <RefreshButton onClick={handleRefresh}>
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
-        </svg>
-        Refresh
-      </RefreshButton>
-      <DebugOverlay>
-        <div>Last Event: {debugInfo.lastEvent}</div>
-        <div>Mouse X: {debugInfo.mouseX}</div>
-        <div>Start X: {mouseStart?.x || "none"}</div>
-        <div>Current Offset: {offset}</div>
-        <div>Current Card: {currentCard}</div>
-        <div>Swiping: {swiping ? "yes" : "no"}</div>
-        <div>Transitioning: {transitioning ? "yes" : "no"}</div>
-      </DebugOverlay>
-      <CarouselContainer
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        $offset={offset}
-        $transitioning={transitioning}
-        $swiping={swiping}
-      >
-        <Card>
-          <Counter />
-        </Card>
-        <Card>
-          <TodoList />
-        </Card>
-        <Card>
-          <ColorPicker />
-        </Card>
-      </CarouselContainer>
-      <NavigationDots>
-        {[...Array(numCards)].map((_, index) => (
-          <Dot
-            key={index}
-            $active={currentCard === index}
-            onClick={() => navigateToCard(index)}
-          />
-        ))}
-      </NavigationDots>
-    </Page>
+    <>
+      <GlobalStyle $hidePointer={isDevice} />
+      <Page>
+        <MainContainer>
+          <NavButton onClick={handlePrevious} disabled={currentApp === 0}>
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </NavButton>
+          <AppContent>{apps[currentApp].component}</AppContent>
+          <NavButton
+            onClick={handleNext}
+            disabled={currentApp === apps.length - 1}
+          >
+            <FontAwesomeIcon icon={faChevronRight} />
+          </NavButton>
+        </MainContainer>
+        <RefreshButton onClick={handleRefresh}>
+          <FontAwesomeIcon icon={faRotate} />
+          Refresh
+        </RefreshButton>
+      </Page>
+    </>
   );
 }
 
