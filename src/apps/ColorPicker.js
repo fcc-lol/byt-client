@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HorizontalLayout } from "../App";
+import { HorizontalLayout } from "../SpringBoard";
 
 export const ColorPicker = () => {
   const [color, setColor] = useState("#ff0000");

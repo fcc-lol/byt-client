@@ -6,9 +6,6 @@ import {
   faChevronRight,
   faRotate
 } from "@fortawesome/free-solid-svg-icons";
-import { Counter } from "./components/Counter";
-import { TodoList } from "./components/TodoList";
-import { ColorPicker } from "./components/ColorPicker";
 
 const GlobalStyle = createGlobalStyle`
   ${(props) =>
@@ -129,50 +126,74 @@ export const HorizontalLayout = styled.div`
   }
 `;
 
-function App() {
+function SpringBoard() {
   const [currentApp, setCurrentApp] = useState(0);
   const [isDevice, setIsDevice] = useState(false);
+  const [apps, setApps] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setIsDevice(params.get("onDevice") === "true");
   }, []);
 
-  const apps = [
-    { name: "Counter", component: <Counter /> },
-    { name: "Todo List", component: <TodoList /> },
-    { name: "Color Picker", component: <ColorPicker /> }
-  ];
+  useEffect(() => {
+    // Dynamically import all files from apps directory
+    const importApps = async () => {
+      const context = require.context("./apps", false, /\.js$/);
+      const loadedApps = [];
+
+      for (const key of context.keys()) {
+        const module = context(key);
+        const appName = key.replace("./", "").replace(".js", "");
+        // Get the component from either default or named export
+        const AppComponent = module.default || Object.values(module)[0];
+
+        loadedApps.push({
+          name: appName.replace(/([A-Z])/g, " $1").trim(), // Add spaces before capital letters
+          component: <AppComponent />
+        });
+      }
+
+      // Sort apps alphabetically by name
+      loadedApps.sort((a, b) => a.name.localeCompare(b.name));
+      setApps(loadedApps);
+    };
+
+    importApps();
+  }, []);
 
   const handlePrevious = () => {
-    if (currentApp > 0) {
-      setCurrentApp(currentApp - 1);
-    }
+    setCurrentApp((current) => (current === 0 ? apps.length - 1 : current - 1));
   };
 
   const handleNext = () => {
-    if (currentApp < apps.length - 1) {
-      setCurrentApp(currentApp + 1);
-    }
+    setCurrentApp((current) => (current === apps.length - 1 ? 0 : current + 1));
   };
 
   const handleRefresh = () => {
     window.location.reload();
   };
 
+  if (apps.length === 0) {
+    return (
+      <Page>
+        <MainContainer>
+          <AppContent>Loading apps...</AppContent>
+        </MainContainer>
+      </Page>
+    );
+  }
+
   return (
     <>
       <GlobalStyle $hidePointer={isDevice} />
       <Page>
         <MainContainer>
-          <NavButton onClick={handlePrevious} disabled={currentApp === 0}>
+          <NavButton onClick={handlePrevious}>
             <FontAwesomeIcon icon={faChevronLeft} />
           </NavButton>
           <AppContent>{apps[currentApp].component}</AppContent>
-          <NavButton
-            onClick={handleNext}
-            disabled={currentApp === apps.length - 1}
-          >
+          <NavButton onClick={handleNext}>
             <FontAwesomeIcon icon={faChevronRight} />
           </NavButton>
         </MainContainer>
@@ -185,4 +206,4 @@ function App() {
   );
 }
 
-export default App;
+export default SpringBoard;
