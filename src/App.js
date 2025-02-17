@@ -157,6 +157,21 @@ const RefreshButton = styled.button`
   }
 `;
 
+const DebugOverlay = styled.div`
+  position: fixed;
+  top: 70px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 1000;
+  max-width: 300px;
+  word-wrap: break-word;
+`;
+
 // Example Components
 const Counter = () => {
   const [count, setCount] = useState(0);
@@ -242,6 +257,12 @@ function App() {
   const [transitioning, setTransitioning] = useState(false);
   const [swiping, setSwiping] = useState(false);
   const [mouseStart, setMouseStart] = useState(null);
+  const [debugInfo, setDebugInfo] = useState({
+    lastEvent: "none",
+    mouseX: 0,
+    startX: 0,
+    diff: 0
+  });
   const cardWidth = 1920;
   const numCards = 3;
   const currentCard = Math.round(-offset / cardWidth);
@@ -260,7 +281,14 @@ function App() {
       target.closest("button") ||
       target.closest("input");
 
-    if (isInteractive) return;
+    if (isInteractive) {
+      setDebugInfo((prev) => ({
+        ...prev,
+        lastEvent: "mouseDown (ignored - interactive)",
+        mouseX: e.clientX
+      }));
+      return;
+    }
 
     setMouseStart({
       x: e.clientX,
@@ -268,26 +296,51 @@ function App() {
     });
     setSwiping(true);
     setTransitioning(false);
+    setDebugInfo((prev) => ({
+      ...prev,
+      lastEvent: "mouseDown",
+      mouseX: e.clientX,
+      startX: e.clientX
+    }));
   };
 
   const handleMouseMove = (e) => {
-    if (!mouseStart) return;
+    if (!mouseStart) {
+      setDebugInfo((prev) => ({
+        ...prev,
+        lastEvent: "mouseMove (ignored - no start)",
+        mouseX: e.clientX
+      }));
+      return;
+    }
 
     const currentX = e.clientX;
     const diff = currentX - mouseStart.x;
     const newOffset = mouseStart.offset + diff;
 
     setOffset(Math.min(0, Math.max(-cardWidth * (numCards - 1), newOffset)));
+    setDebugInfo((prev) => ({
+      ...prev,
+      lastEvent: "mouseMove",
+      mouseX: currentX,
+      diff
+    }));
   };
 
   const handleMouseUp = (e) => {
-    if (!mouseStart) return;
+    if (!mouseStart) {
+      setDebugInfo((prev) => ({
+        ...prev,
+        lastEvent: "mouseUp (ignored - no start)",
+        mouseX: e.clientX
+      }));
+      return;
+    }
 
     const diff = e.clientX - mouseStart.x;
     setSwiping(false);
     setTransitioning(true);
 
-    // Simple threshold-based card change (15% of card width)
     const threshold = cardWidth * 0.15;
     let targetCard = currentCard;
 
@@ -298,16 +351,25 @@ function App() {
 
     setOffset(-targetCard * cardWidth);
     setMouseStart(null);
+    setDebugInfo((prev) => ({
+      ...prev,
+      lastEvent: `mouseUp (diff: ${diff}, threshold: ${threshold})`,
+      mouseX: e.clientX,
+      diff
+    }));
     setTimeout(() => setTransitioning(false), 500);
   };
 
-  // Handle case where mouse leaves the window
   const handleMouseLeave = () => {
     if (mouseStart) {
       setSwiping(false);
       setMouseStart(null);
       setTransitioning(true);
       setOffset(-currentCard * cardWidth);
+      setDebugInfo((prev) => ({
+        ...prev,
+        lastEvent: "mouseLeave"
+      }));
       setTimeout(() => setTransitioning(false), 500);
     }
   };
@@ -324,6 +386,15 @@ function App() {
         </svg>
         Refresh
       </RefreshButton>
+      <DebugOverlay>
+        <div>Last Event: {debugInfo.lastEvent}</div>
+        <div>Mouse X: {debugInfo.mouseX}</div>
+        <div>Start X: {mouseStart?.x || "none"}</div>
+        <div>Current Offset: {offset}</div>
+        <div>Current Card: {currentCard}</div>
+        <div>Swiping: {swiping ? "yes" : "no"}</div>
+        <div>Transitioning: {transitioning ? "yes" : "no"}</div>
+      </DebugOverlay>
       <CarouselContainer
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
