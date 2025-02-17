@@ -126,6 +126,37 @@ const HorizontalLayout = styled.div`
   }
 `;
 
+const RefreshButton = styled.button`
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  &:hover {
+    background: rgba(0, 123, 255, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`;
+
 // Example Components
 const Counter = () => {
   const [count, setCount] = useState(0);
@@ -290,8 +321,18 @@ function App() {
     }
   );
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <Page>
+      <RefreshButton onClick={handleRefresh}>
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+        </svg>
+        Refresh
+      </RefreshButton>
       <CarouselContainer
         {...bind()}
         $offset={offset}
