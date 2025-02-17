@@ -7,10 +7,10 @@ import {
   faCloud,
   faCloudRain,
   faSnowflake,
-  faCloudBolt,
   faSmog,
   faLocationDot,
-  faSpinner
+  faSpinner,
+  faCloudBolt
 } from "@fortawesome/free-solid-svg-icons";
 
 const WeatherContainer = styled.div`
@@ -50,19 +50,26 @@ const getWeatherIcon = (weatherIcon) => {
   // AccuWeather icon mapping
   // 1-5 Sunny/Mostly Sunny
   // 6-11 Cloudy/Mostly Cloudy
-  // 12-18 Rain
+  // 12-14 Rain
+  // 15 Thunderstorms
+  // 16-17 Strong Thunderstorms
+  // 18 Rain and Thunder
   // 19-29 Snow/Flurries
   // 30-31 Hot
   // 32 Windy
   // 33-34 Moon/Clear (night)
   // 35-38 Cloudy (night)
-  // 39-44 Rain (night)
+  // 39-44 Rain/Storms (night)
 
   if (weatherIcon <= 5) return faSun;
   if (weatherIcon <= 11) return faCloud;
-  if (weatherIcon <= 18) return faCloudRain;
+  if (weatherIcon <= 14) return faCloudRain;
+  if (weatherIcon <= 18) return faCloudBolt; // Thunder/Storm conditions
   if (weatherIcon <= 29) return faSnowflake;
   if (weatherIcon <= 32) return faSmog;
+  if (weatherIcon <= 34) return faSun; // Clear night
+  if (weatherIcon <= 38) return faCloud; // Cloudy night
+  if (weatherIcon <= 44) return faCloudBolt; // Storms at night
   return faCloud;
 };
 
@@ -78,7 +85,7 @@ export const Weather = () => {
         const LOCATION_KEY = "349727"; // Long Island City
 
         const response = await fetch(
-          `http://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}`
+          `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}`
         );
 
         if (!response.ok) {
