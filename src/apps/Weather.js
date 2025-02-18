@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { HorizontalLayout } from "../SpringBoard";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,12 +15,15 @@ import {
 const WeatherContainer = styled.div`
   text-align: center;
   padding: 2rem;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
 `;
 
 const WeatherIcon = styled(FontAwesomeIcon)`
   font-size: 4rem;
   margin: 1rem 0;
-  color: #4a90e2;
+  color: #fff;
 `;
 
 const Temperature = styled.div`
@@ -94,7 +96,6 @@ export const Weather = () => {
         }
 
         const [data] = await response.json();
-        console.log("Weather data:", data);
         setWeather(data);
       } catch (err) {
         console.error("Weather error:", err);
@@ -128,20 +129,16 @@ export const Weather = () => {
 
   return (
     <WeatherContainer>
-      <h2>Weather</h2>
-      <HorizontalLayout>
-        <div>
-          <WeatherIcon icon={getWeatherIcon(weather.WeatherIcon)} />
-          <Temperature>
-            {Math.round(weather.Temperature.Imperial.Value)}°F
-          </Temperature>
-          <Description>{weather.WeatherText}</Description>
-          <Location>
-            <FontAwesomeIcon icon={faLocationDot} />
-            New York, US
-          </Location>
-        </div>
-      </HorizontalLayout>
+      <Icon></Icon>
+      <WeatherIcon icon={getWeatherIcon(weather.WeatherIcon)} />
+      <Temperature>
+        {Math.round(weather.Temperature.Imperial.Value)}°F
+      </Temperature>
+      <Description>{weather.WeatherText}</Description>
+      <Location>
+        <FontAwesomeIcon icon={faLocationDot} />
+        New York, US
+      </Location>
     </WeatherContainer>
   );
 };

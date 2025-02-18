@@ -39,7 +39,6 @@ const MainContainer = styled.div`
 `;
 
 const AppContent = styled.div`
-  background: white;
   border-radius: 2rem;
   width: 100%;
   height: 100%;
@@ -47,14 +46,6 @@ const AppContent = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
-  > div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
 `;
 
 const NavButton = styled.button`
@@ -100,10 +91,6 @@ const RefreshButton = styled.button`
   transition: all 0.3s ease;
   z-index: 1000;
 
-  &:hover {
-    background: rgba(0, 123, 255, 0.2);
-  }
-
   &:active {
     transform: scale(0.95);
   }
@@ -111,18 +98,6 @@ const RefreshButton = styled.button`
   svg {
     width: 1rem;
     height: 1rem;
-  }
-`;
-
-export const HorizontalLayout = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  width: 100%;
-  justify-content: center;
-
-  > * {
-    margin: 0 1rem;
   }
 `;
 
