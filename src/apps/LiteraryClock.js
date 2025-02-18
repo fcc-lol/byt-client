@@ -207,6 +207,12 @@ const LiteraryClock = () => {
         " "
       );
 
+      // Normalize time format to use colon instead of period
+      randomQuote.quote_time_case = randomQuote.quote_time_case.replace(
+        /(\d+)\.(\d+)/,
+        "$1:$2"
+      );
+
       const maxTotalLength = 80;
       const totalLength =
         randomQuote.quote_first.length + randomQuote.quote_last.length;
