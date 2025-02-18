@@ -17,14 +17,13 @@ const GlobalStyle = createGlobalStyle`
   `}
 `;
 
-const Page = styled.div`
+const Screen = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   background: #000000;
-  position: fixed;
   top: 0;
   left: 0;
 `;
@@ -52,8 +51,8 @@ const NavButton = styled.button`
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
-  width: 8rem;
-  height: 100vh;
+  width: ${(props) => (props.$isDevice ? "8rem" : "4rem")};
+  height: ${(props) => (props.$isDevice ? "100vh" : "100%")};
   border-radius: 2rem;
   font-size: 1.5rem;
   display: flex;
@@ -62,6 +61,7 @@ const NavButton = styled.button`
   cursor: pointer;
   transition: background 0.3s, transform 0.3s;
   flex-shrink: 0;
+  width: 5rem;
 
   &:active {
     background: rgba(255, 255, 255, 0.2);
@@ -101,10 +101,37 @@ const RefreshButton = styled.button`
   }
 `;
 
+const SimulatorContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #333;
+`;
+
+const Simulator = styled.div`
+  width: 1920px;
+  height: 480px;
+  background: #000000;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  transform-origin: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+`;
+
 function SpringBoard() {
   const [currentApp, setCurrentApp] = useState(0);
   const [isDevice, setIsDevice] = useState(false);
   const [apps, setApps] = useState([]);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -137,6 +164,21 @@ function SpringBoard() {
     importApps();
   }, []);
 
+  useEffect(() => {
+    const calculateScale = () => {
+      // Calculate scale but cap it at 1.0 to prevent scaling above original size
+      const scale = Math.min(
+        1.0, // Maximum scale
+        Math.min(window.innerWidth / 1920, window.innerHeight / 480) * 0.9
+      );
+      setScale(scale);
+    };
+
+    calculateScale();
+    window.addEventListener("resize", calculateScale);
+    return () => window.removeEventListener("resize", calculateScale);
+  }, []);
+
   const handlePrevious = () => {
     setCurrentApp((current) => (current === 0 ? apps.length - 1 : current - 1));
   };
@@ -151,32 +193,52 @@ function SpringBoard() {
 
   if (apps.length === 0) {
     return (
-      <Page>
-        <MainContainer>
-          <AppContent>Loading apps...</AppContent>
-        </MainContainer>
-      </Page>
+      <MainContainer>
+        <AppContent>Loading apps...</AppContent>
+      </MainContainer>
     );
   }
+
+  const content = (
+    <MainContainer>
+      <NavButton onClick={handlePrevious} $isDevice={isDevice}>
+        <FontAwesomeIcon icon={faChevronLeft} />
+      </NavButton>
+      <AppContent>{apps[currentApp].component}</AppContent>
+      <NavButton onClick={handleNext} $isDevice={isDevice}>
+        <FontAwesomeIcon icon={faChevronRight} />
+      </NavButton>
+    </MainContainer>
+  );
 
   return (
     <>
       <GlobalStyle $hidePointer={isDevice} />
-      <Page>
-        <MainContainer>
-          <NavButton onClick={handlePrevious}>
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </NavButton>
-          <AppContent>{apps[currentApp].component}</AppContent>
-          <NavButton onClick={handleNext}>
-            <FontAwesomeIcon icon={faChevronRight} />
-          </NavButton>
-        </MainContainer>
-        <RefreshButton onClick={handleRefresh}>
-          <FontAwesomeIcon icon={faRotate} />
-          Refresh
-        </RefreshButton>
-      </Page>
+      {isDevice ? (
+        <Screen>
+          <RefreshButton onClick={handleRefresh}>
+            <FontAwesomeIcon icon={faRotate} />
+            Refresh
+          </RefreshButton>
+          {content}
+        </Screen>
+      ) : (
+        <SimulatorContainer>
+          <Simulator
+            style={{
+              transform: `translate(-50%, -50%) scale(${scale})`
+            }}
+          >
+            <Screen>
+              <RefreshButton onClick={handleRefresh}>
+                <FontAwesomeIcon icon={faRotate} />
+                Refresh
+              </RefreshButton>
+              {content}
+            </Screen>
+          </Simulator>
+        </SimulatorContainer>
+      )}
     </>
   );
 }
