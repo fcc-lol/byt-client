@@ -104,8 +104,11 @@ const LiteraryClock = () => {
       text.length - trailingSpace.length
     );
 
-    // Account for the space in the max length
-    const adjustedMaxLength = maxLength - 1; // Always account for one space
+    // Account for ellipsis (3 dots) and one space in max length if we might need it
+    const ellipsisLength = 3;
+    const adjustedMaxLength =
+      maxLength -
+      (textWithoutSpaces.length > maxLength ? ellipsisLength + 1 : 1);
 
     console.log("Truncating text:", {
       original: text,
@@ -115,8 +118,9 @@ const LiteraryClock = () => {
       truncateFromStart
     });
 
-    // Don't trim - preserve original spacing
-    if (textWithoutSpaces.length <= adjustedMaxLength) {
+    // Check if text fits without truncation (including potential ellipsis)
+    if (textWithoutSpaces.length <= maxLength - 1) {
+      // Just account for one space
       console.log("Text fits within limit, no truncation needed");
       return {
         text: truncateFromStart
@@ -129,7 +133,7 @@ const LiteraryClock = () => {
     // Split into words and truncate from appropriate end
     const words = textWithoutSpaces.trim().split(/\s+/);
     let result;
-    let needsEllipsis;
+    let needsEllipsis = true; // If we got here, we definitely need ellipsis
     let remainingWords;
 
     if (truncateFromStart) {
@@ -144,7 +148,6 @@ const LiteraryClock = () => {
         result = words[i] + " " + result;
         i--;
       }
-      needsEllipsis = i >= 0;
       remainingWords = words.slice(0, i + 1);
       result = result + " "; // Always add one space at the end
     } else {
@@ -159,7 +162,6 @@ const LiteraryClock = () => {
         result = result + " " + words[i];
         i++;
       }
-      needsEllipsis = i < words.length;
       remainingWords = words.slice(i);
       result = " " + result; // Always add one space at the start
     }
@@ -172,7 +174,7 @@ const LiteraryClock = () => {
 
     return {
       text: preserveSpaces(result),
-      needsEllipsis
+      needsEllipsis: needsEllipsis && remainingWords.length > 0
     };
   };
 
@@ -208,7 +210,7 @@ const LiteraryClock = () => {
         " "
       );
 
-      const maxTotalLength = 80; // Increased from 60 to show more text
+      const maxTotalLength = 80;
       const totalLength =
         randomQuote.quote_first.length + randomQuote.quote_last.length;
 
