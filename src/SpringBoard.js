@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import styled from "styled-components";
 import {
   faChevronLeft,
   faChevronRight,
   faRotate
 } from "@fortawesome/free-solid-svg-icons";
 
-const GlobalStyle = createGlobalStyle`
-  ${(props) =>
-    props.$hidePointer &&
-    `
-    * {
-      cursor: none !important;
-    }
-  `}
-`;
+import Icon from "./components/Icon";
 
 const Screen = styled.div`
   display: flex;
@@ -26,19 +17,20 @@ const Screen = styled.div`
   background: #000000;
   top: 0;
   left: 0;
-`;
+  gap: 2rem;
+  position: absolute;
 
-const MainContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  height: 100%;
-  width: 100%;
+  ${(props) =>
+    props.$hidePointer &&
+    `
+    * {
+      cursor: none !important;
+    }
+  `}
 `;
 
 const AppContent = styled.div`
-  border-radius: 2rem;
+  border-radius: ${(props) => props.theme.borderRadius.large};
   width: 100%;
   height: 100%;
   display: flex;
@@ -51,9 +43,9 @@ const AppSwitcherButton = styled.button`
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
-  width: ${(props) => (props.$isDevice ? "8rem" : "4rem")};
-  height: ${(props) => (props.$isDevice ? "100vh" : "100%")};
-  border-radius: 2rem;
+  width: 5rem;
+  height: 100%;
+  border-radius: ${(props) => props.theme.borderRadius.large};
   font-size: 1.5rem;
   display: flex;
   align-items: center;
@@ -61,7 +53,6 @@ const AppSwitcherButton = styled.button`
   cursor: pointer;
   transition: background 0.3s, transform 0.3s;
   flex-shrink: 0;
-  width: 5rem;
 
   &:active {
     background: rgba(255, 255, 255, 0.2);
@@ -78,27 +69,17 @@ const RefreshButton = styled.button`
   position: fixed;
   top: 1.25rem;
   left: 1.25rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  background: rgba(0, 123, 255, 0.1);
-  color: red;
+  padding: 2rem;
+  font-size: 3rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 1);
   border: none;
-  border-radius: 1.25rem;
+  border-radius: ${(props) => props.theme.borderRadius.large};
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  transition: all 0.3s ease;
   z-index: 1000;
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  svg {
-    width: 1rem;
-    height: 1rem;
-  }
 `;
 
 const SimulatorContainer = styled.div`
@@ -117,7 +98,6 @@ const Simulator = styled.div`
   width: 1920px;
   height: 480px;
   background: #000000;
-  border-radius: 0.25rem;
   overflow: hidden;
   position: relative;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
@@ -125,6 +105,8 @@ const Simulator = styled.div`
   position: absolute;
   left: 50%;
   top: 50%;
+  display: flex;
+  flex-direction: column;
 `;
 
 function SpringBoard() {
@@ -192,33 +174,27 @@ function SpringBoard() {
   };
 
   if (apps.length === 0) {
-    return (
-      <MainContainer>
-        <AppContent>Loading apps...</AppContent>
-      </MainContainer>
-    );
+    return <AppContent>Loading apps...</AppContent>;
   }
 
   const content = (
-    <MainContainer>
+    <>
       <AppSwitcherButton onClick={handlePrevious} $isDevice={isDevice}>
-        <FontAwesomeIcon icon={faChevronLeft} />
+        <Icon icon={faChevronLeft} />
       </AppSwitcherButton>
       <AppContent>{apps[currentApp].component}</AppContent>
       <AppSwitcherButton onClick={handleNext} $isDevice={isDevice}>
-        <FontAwesomeIcon icon={faChevronRight} />
+        <Icon icon={faChevronRight} />
       </AppSwitcherButton>
-    </MainContainer>
+    </>
   );
 
   return (
     <>
-      <GlobalStyle $hidePointer={isDevice} />
       {isDevice ? (
-        <Screen>
+        <Screen $hidePointer={true}>
           <RefreshButton onClick={handleRefresh}>
-            <FontAwesomeIcon icon={faRotate} />
-            Refresh
+            <Icon icon={faRotate} />
           </RefreshButton>
           {content}
         </Screen>
@@ -231,8 +207,7 @@ function SpringBoard() {
           >
             <Screen>
               <RefreshButton onClick={handleRefresh}>
-                <FontAwesomeIcon icon={faRotate} />
-                Refresh
+                <Icon icon={faRotate} />
               </RefreshButton>
               {content}
             </Screen>

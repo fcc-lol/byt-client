@@ -1,52 +1,48 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FontAwesomeIcon as Icon } from "@fortawesome/react-fontawesome";
 import {
   faSun,
   faCloud,
   faCloudRain,
   faSnowflake,
   faSmog,
-  faLocationDot,
-  faSpinner,
-  faCloudBolt
+  faCompass,
+  faCloudBolt,
+  faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 
-const WeatherContainer = styled.div`
-  text-align: center;
-  padding: 2rem;
-  color: #fff;
-  display: flex;
-  flex-direction: row;
-`;
+import Icon from "../components/Icon";
+import Grid from "../components/Grid";
+import Card from "../components/Card";
 
-const WeatherIcon = styled(FontAwesomeIcon)`
-  font-size: 4rem;
+const BigIcon = styled(Icon)`
+  font-size: 8rem;
   margin: 1rem 0;
-  color: #fff;
+  color: rgba(255, 255, 255, 1);
+
+  ${(props) =>
+    props.disabled &&
+    `
+    opacity: 0.25;
+  `}
 `;
 
-const Temperature = styled.div`
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
-`;
-
-const Description = styled.div`
-  font-size: 1.2rem;
-  color: #666;
+const Label = styled.div`
+  font-size: 4rem;
+  color: rgba(255, 255, 255, 1);
   margin-bottom: 1rem;
   text-transform: capitalize;
+  font-family: "Space Mono", monospace;
+  text-transform: uppercase;
+  font-weight: 600;
 `;
 
-const Location = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  color: #888;
+const Value = styled.div`
+  font-size: 8rem;
+  color: rgba(255, 255, 255, 1);
+  margin-bottom: 1rem;
+  font-family: "Space Mono", monospace;
+  font-weight: 600;
 `;
 
 const getWeatherIcon = (weatherIcon) => {
@@ -111,35 +107,38 @@ export const Weather = () => {
 
   if (loading) {
     return (
-      <WeatherContainer>
-        <WeatherIcon icon={faSpinner} spin />
-        <Description>Loading weather data...</Description>
-      </WeatherContainer>
+      <Grid>
+        <Card>
+          <BigIcon icon={faCompass} spin disabled />
+        </Card>
+      </Grid>
     );
   }
 
   if (error) {
     return (
-      <WeatherContainer>
-        <Description>Error fetching weather: {error}</Description>
-      </WeatherContainer>
+      <Grid>
+        <Card>
+          <BigIcon icon={faExclamationTriangle} disabled />
+        </Card>
+      </Grid>
     );
   }
 
   if (!weather) return null;
 
   return (
-    <WeatherContainer>
-      <Icon></Icon>
-      <WeatherIcon icon={getWeatherIcon(weather.WeatherIcon)} />
-      <Temperature>
-        {Math.round(weather.Temperature.Imperial.Value)}°F
-      </Temperature>
-      <Description>{weather.WeatherText}</Description>
-      <Location>
-        <FontAwesomeIcon icon={faLocationDot} />
-        New York, US
-      </Location>
-    </WeatherContainer>
+    <Grid>
+      <Card>
+        <Value>NYC</Value>
+      </Card>
+      <Card>
+        <BigIcon icon={getWeatherIcon(weather.WeatherIcon)} />
+        <Label>{weather.WeatherText}</Label>
+      </Card>
+      <Card>
+        <Value>{Math.round(weather.Temperature.Imperial.Value)}°F</Value>
+      </Card>
+    </Grid>
   );
 };
