@@ -153,6 +153,21 @@ function SpringBoard() {
       // Sort apps alphabetically by name
       loadedApps.sort((a, b) => a.name.localeCompare(b.name));
       setApps(loadedApps);
+
+      // Check for app parameter in URL
+      const params = new URLSearchParams(window.location.search);
+      const appParam = params.get("app");
+      if (appParam) {
+        // Find the index of the requested app (case insensitive)
+        const appIndex = loadedApps.findIndex(
+          (app) =>
+            app.name.toLowerCase().replace(/\s+/g, "") ===
+            appParam.toLowerCase().replace(/\s+/g, "")
+        );
+        if (appIndex !== -1) {
+          setCurrentApp(appIndex);
+        }
+      }
     };
 
     importApps();
@@ -217,12 +232,7 @@ function SpringBoard() {
               transform: `translate(-50%, -50%) scale(${scale})`
             }}
           >
-            <Screen>
-              <RefreshButton onClick={handleRefresh} className="refresh-button">
-                <Icon icon={faRotate} />
-              </RefreshButton>
-              {content}
-            </Screen>
+            <Screen>{content}</Screen>
           </Simulator>
         </SimulatorContainer>
       )}
