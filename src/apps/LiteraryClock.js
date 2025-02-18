@@ -104,11 +104,10 @@ const LiteraryClock = () => {
       text.length - trailingSpace.length
     );
 
-    // Account for ellipsis (3 dots) and one space in max length if we might need it
+    // Account for ellipsis (3 dots) and one space in max length
     const ellipsisLength = 3;
-    const adjustedMaxLength =
-      maxLength -
-      (textWithoutSpaces.length > maxLength ? ellipsisLength + 1 : 1);
+    const spaceLength = 1;
+    const adjustedMaxLength = maxLength - (ellipsisLength + spaceLength);
 
     console.log("Truncating text:", {
       original: text,
@@ -118,9 +117,8 @@ const LiteraryClock = () => {
       truncateFromStart
     });
 
-    // Check if text fits without truncation (including potential ellipsis)
-    if (textWithoutSpaces.length <= maxLength - 1) {
-      // Just account for one space
+    // Check if text fits without truncation
+    if (textWithoutSpaces.length <= adjustedMaxLength) {
       console.log("Text fits within limit, no truncation needed");
       return {
         text: truncateFromStart
@@ -133,7 +131,6 @@ const LiteraryClock = () => {
     // Split into words and truncate from appropriate end
     const words = textWithoutSpaces.trim().split(/\s+/);
     let result;
-    let needsEllipsis = true; // If we got here, we definitely need ellipsis
     let remainingWords;
 
     if (truncateFromStart) {
@@ -168,13 +165,13 @@ const LiteraryClock = () => {
 
     console.log("Truncation result:", {
       result,
-      needsEllipsis,
-      remainingWords
+      remainingWords,
+      needsEllipsis: remainingWords.length > 0
     });
 
     return {
       text: preserveSpaces(result),
-      needsEllipsis: needsEllipsis && remainingWords.length > 0
+      needsEllipsis: remainingWords.length > 0
     };
   };
 
@@ -210,7 +207,7 @@ const LiteraryClock = () => {
         " "
       );
 
-      const maxTotalLength = 88;
+      const maxTotalLength = 80;
       const totalLength =
         randomQuote.quote_first.length + randomQuote.quote_last.length;
 
