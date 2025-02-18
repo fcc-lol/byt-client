@@ -210,7 +210,7 @@ const LiteraryClock = () => {
         " "
       );
 
-      const maxTotalLength = 80;
+      const maxTotalLength = 88;
       const totalLength =
         randomQuote.quote_first.length + randomQuote.quote_last.length;
 
