@@ -51,7 +51,7 @@ const AppSwitcherButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
+  transition: background 0.25s, transform 0.25s;
   flex-shrink: 0;
 
   &:active {
@@ -62,6 +62,10 @@ const AppSwitcherButton = styled.button`
     opacity: 0.3;
     cursor: not-allowed;
     transform: none;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
@@ -78,8 +82,16 @@ const RefreshButton = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.375rem;
   z-index: 1000;
+  transition: background 0.25s;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const SimulatorContainer = styled.div`
@@ -193,7 +205,7 @@ function SpringBoard() {
     <>
       {isDevice ? (
         <Screen $hidePointer={true}>
-          <RefreshButton onClick={handleRefresh}>
+          <RefreshButton onClick={handleRefresh} className="refresh-button">
             <Icon icon={faRotate} />
           </RefreshButton>
           {content}
@@ -206,7 +218,7 @@ function SpringBoard() {
             }}
           >
             <Screen>
-              <RefreshButton onClick={handleRefresh}>
+              <RefreshButton onClick={handleRefresh} className="refresh-button">
                 <Icon icon={faRotate} />
               </RefreshButton>
               {content}
