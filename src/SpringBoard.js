@@ -47,7 +47,7 @@ const AppContent = styled.div`
   align-items: center;
 `;
 
-const NavButton = styled.button`
+const AppSwitcherButton = styled.button`
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
@@ -201,13 +201,13 @@ function SpringBoard() {
 
   const content = (
     <MainContainer>
-      <NavButton onClick={handlePrevious} $isDevice={isDevice}>
+      <AppSwitcherButton onClick={handlePrevious} $isDevice={isDevice}>
         <FontAwesomeIcon icon={faChevronLeft} />
-      </NavButton>
+      </AppSwitcherButton>
       <AppContent>{apps[currentApp].component}</AppContent>
-      <NavButton onClick={handleNext} $isDevice={isDevice}>
+      <AppSwitcherButton onClick={handleNext} $isDevice={isDevice}>
         <FontAwesomeIcon icon={faChevronRight} />
-      </NavButton>
+      </AppSwitcherButton>
     </MainContainer>
   );
 
