@@ -19,6 +19,7 @@ const Screen = styled.div`
   left: 0;
   gap: 2rem;
   position: absolute;
+  overflow: hidden;
 
   ${(props) =>
     props.$hidePointer &&
@@ -37,6 +38,8 @@ const AppContent = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  min-width: 0; // Allow flex items to shrink below content size
 `;
 
 const AppSwitcherButton = styled.button`
