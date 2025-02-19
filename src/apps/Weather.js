@@ -12,8 +12,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import Icon from "../components/Icon";
-import Grid from "../components/Grid";
+import Columns from "../components/Columns";
 import Card from "../components/Card";
+import Label from "../components/Label";
+import Value from "../components/Value";
 
 const BigIcon = styled(Icon)`
   font-size: 8rem;
@@ -25,24 +27,6 @@ const BigIcon = styled(Icon)`
     `
     opacity: 0.25;
   `}
-`;
-
-const Label = styled.div`
-  font-size: 4rem;
-  color: rgba(255, 255, 255, 1);
-  margin-bottom: 1rem;
-  text-transform: capitalize;
-  font-family: "Space Mono", monospace;
-  text-transform: uppercase;
-  font-weight: 600;
-`;
-
-const Value = styled.div`
-  font-size: 8rem;
-  color: rgba(255, 255, 255, 1);
-  margin-bottom: 1rem;
-  font-family: "Space Mono", monospace;
-  font-weight: 600;
 `;
 
 const getWeatherIcon = (weatherIcon) => {
@@ -107,28 +91,28 @@ export const Weather = () => {
 
   if (loading) {
     return (
-      <Grid>
+      <Columns>
         <Card>
           <BigIcon icon={faCompass} spin disabled />
         </Card>
-      </Grid>
+      </Columns>
     );
   }
 
   if (error) {
     return (
-      <Grid>
+      <Columns>
         <Card>
           <BigIcon icon={faExclamationTriangle} disabled />
         </Card>
-      </Grid>
+      </Columns>
     );
   }
 
   if (!weather) return null;
 
   return (
-    <Grid>
+    <Columns>
       <Card>
         <Value>NYC</Value>
       </Card>
@@ -139,6 +123,6 @@ export const Weather = () => {
       <Card>
         <Value>{Math.round(weather.Temperature.Imperial.Value)}°F</Value>
       </Card>
-    </Grid>
+    </Columns>
   );
 };

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 
-import Grid from "../components/Grid";
+import Columns from "../components/Columns";
 import Card from "../components/Card";
 
 const Time = styled.div`
@@ -24,11 +24,11 @@ const Clock = () => {
   }, []);
 
   return (
-    <Grid>
+    <Columns>
       <Card>
         <Time>{time.toLocaleTimeString()}</Time>
       </Card>
-    </Grid>
+    </Columns>
   );
 };
 

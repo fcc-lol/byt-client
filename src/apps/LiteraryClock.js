@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useState, useEffect, useRef } from "react";
 
-import Grid from "../components/Grid";
+import Columns from "../components/Columns";
 import Card from "../components/Card";
 
 const QuoteContainer = styled.div`
@@ -291,7 +291,7 @@ const LiteraryClock = () => {
   }, []);
 
   return (
-    <Grid>
+    <Columns>
       <Card>
         {quote && (
           <>
@@ -312,7 +312,7 @@ const LiteraryClock = () => {
           </>
         )}
       </Card>
-    </Grid>
+    </Columns>
   );
 };
 
