@@ -257,11 +257,13 @@ const LiteraryClock = () => {
 
       return () => clearInterval(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Initial fetch
   useEffect(() => {
     fetchQuote(time.getHours(), time.getMinutes());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
