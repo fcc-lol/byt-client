@@ -4,6 +4,7 @@ import Rows from "../components/Rows";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
+import Description from "../components/Description";
 
 const ColorPalette = () => {
   const [palette, setPalette] = useState(null);
@@ -32,10 +33,6 @@ const ColorPalette = () => {
     fetchPalette();
   }, []);
 
-  const copyToClipboard = (hex) => {
-    navigator.clipboard.writeText(hex);
-  };
-
   return (
     <Columns>
       {loading ? (
@@ -46,18 +43,13 @@ const ColorPalette = () => {
         <Rows onClick={fetchPalette}>
           <Columns>
             {palette.colors.map((color, index) => (
-              <Card
-                key={index}
-                style={{ backgroundColor: `#${color}` }}
-                hex={`#${color}`}
-                onClick={() => copyToClipboard(`#${color}`)}
-              />
+              <Card key={index} style={{ backgroundColor: `#${color}` }} />
             ))}
           </Columns>
           <Card>
-            <Label>
+            <Description>
               {palette.title} by {palette.userName}
-            </Label>
+            </Description>
           </Card>
         </Rows>
       ) : (
