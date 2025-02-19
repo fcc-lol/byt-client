@@ -41,7 +41,7 @@ const TimeText = styled.strong`
 
 const Source = styled.div`
   font-family: "Space Mono", monospace;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.2);
   text-transform: uppercase;
   font-size: 2rem;
 `;
@@ -107,19 +107,11 @@ const LiteraryClock = () => {
     // Account for ellipsis (3 dots) and one space in max length
     const ellipsisLength = 3;
     const spaceLength = 1;
-    const adjustedMaxLength = maxLength - (ellipsisLength + spaceLength);
+    const effectiveMaxLength = maxLength - spaceLength; // Reserve space for the space
+    const adjustedMaxLength = effectiveMaxLength - ellipsisLength; // Always reserve space for ellipsis
 
-    console.log("Truncating text:", {
-      original: text,
-      textWithoutSpaces,
-      maxLength,
-      adjustedMaxLength,
-      truncateFromStart
-    });
-
-    // Check if text fits without truncation
-    if (textWithoutSpaces.length <= adjustedMaxLength) {
-      console.log("Text fits within limit, no truncation needed");
+    // Check if text fits without truncation (not counting the ellipsis space)
+    if (textWithoutSpaces.length <= effectiveMaxLength) {
       return {
         text: truncateFromStart
           ? preserveSpaces(textWithoutSpaces + " ")
@@ -162,12 +154,6 @@ const LiteraryClock = () => {
       remainingWords = words.slice(i);
       result = " " + result; // Always add one space at the start
     }
-
-    console.log("Truncation result:", {
-      result,
-      remainingWords,
-      needsEllipsis: remainingWords.length > 0
-    });
 
     return {
       text: preserveSpaces(result),
@@ -213,41 +199,41 @@ const LiteraryClock = () => {
         "$1:$2"
       );
 
-      const maxTotalLength = 80;
-      const totalLength =
+      // Fixed width for monospace font - 35 chars per line, 3 lines total
+      const charsPerLine = 35;
+      const maxTotalLength = charsPerLine * 3; // Use all three lines worth of space
+      const ellipsisLength = 3; // Length of "..."
+
+      // Calculate available space for each part
+      const timePartLength = randomQuote.quote_time_case.length;
+      const totalTextLength =
         randomQuote.quote_first.length + randomQuote.quote_last.length;
+      const firstPartRatio = randomQuote.quote_first.length / totalTextLength;
 
-      // Remove last punctuation from quote_last if present
-      randomQuote.quote_last = randomQuote.quote_last.replace(/[.,!?]$/, "");
+      // Account for potential ellipsis at both ends (6 chars total)
+      const availableSpace =
+        maxTotalLength - timePartLength - ellipsisLength * 2;
 
-      if (totalLength <= maxTotalLength) {
-        // If the total fits, no need to truncate
-        randomQuote.quote_first = preserveSpaces(randomQuote.quote_first + " ");
-        randomQuote.quote_last = preserveSpaces(" " + randomQuote.quote_last);
-        randomQuote.needsEllipsisFront = false;
-        randomQuote.needsEllipsisBack = false;
-      } else {
-        // Need to truncate - distribute the space proportionally
-        const ratio = randomQuote.quote_first.length / totalLength;
-        const maxFirstLength = Math.floor(maxTotalLength * ratio);
-        const maxLastLength = maxTotalLength - maxFirstLength;
+      // Distribute the available space proportionally between first and last parts
+      const maxFirstLength = Math.floor(availableSpace * firstPartRatio);
+      const maxLastLength = availableSpace - maxFirstLength;
 
-        const firstPart = truncateText(
-          randomQuote.quote_first,
-          maxFirstLength,
-          true
-        );
-        const lastPart = truncateText(
-          randomQuote.quote_last,
-          maxLastLength,
-          false
-        );
+      // Always truncate to ensure consistent handling
+      const firstPart = truncateText(
+        randomQuote.quote_first,
+        maxFirstLength,
+        true
+      );
+      const lastPart = truncateText(
+        randomQuote.quote_last,
+        maxLastLength,
+        false
+      );
 
-        randomQuote.quote_first = firstPart.text;
-        randomQuote.quote_last = lastPart.text;
-        randomQuote.needsEllipsisFront = firstPart.needsEllipsis;
-        randomQuote.needsEllipsisBack = lastPart.needsEllipsis;
-      }
+      randomQuote.quote_first = firstPart.text;
+      randomQuote.quote_last = lastPart.text;
+      randomQuote.needsEllipsisFront = firstPart.needsEllipsis;
+      randomQuote.needsEllipsisBack = lastPart.needsEllipsis;
 
       setQuote(randomQuote);
     } catch (error) {
