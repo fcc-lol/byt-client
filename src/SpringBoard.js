@@ -14,7 +14,7 @@ const Screen = styled.div`
   justify-content: center;
   height: 100%;
   width: 100%;
-  background: #000000;
+  background: red;
   top: 0;
   left: 0;
   gap: 2rem;
