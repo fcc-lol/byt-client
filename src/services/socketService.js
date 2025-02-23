@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const socketURL =
-  process.env.NODE_ENV === "production"
+  process.env.RAILWAY_ENVIRONMENT_NAME === "production"
     ? "wss://byt-server-production.up.railway.app"
     : "ws://localhost:3000";
 
