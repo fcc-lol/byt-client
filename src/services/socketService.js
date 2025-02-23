@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socketURL = "wss://byt-server-production.up.railway.app";
+const socketURL = `wss://${process.env.REACT_APP_SERVER_URL}`;
 
 class SocketService {
   static instance = null;
