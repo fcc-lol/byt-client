@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import Icon from "./components/Icon";
-
+import NotificationCenter from "./components/NotificationCenter";
 const Screen = styled.div`
   display: flex;
   align-items: center;
@@ -209,6 +209,7 @@ function SpringBoard() {
 
   const content = (
     <>
+      <NotificationCenter />
       <AppSwitcherButton onClick={handlePrevious} $isDevice={isDevice}>
         <Icon icon={faChevronLeft} />
       </AppSwitcherButton>
