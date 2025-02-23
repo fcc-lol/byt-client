@@ -1,7 +1,5 @@
 import { io } from "socket.io-client";
 
-const socketURL = `wss://${process.env.REACT_APP_SERVER_URL}`;
-
 class SocketService {
   static instance = null;
   socket = null;
@@ -16,7 +14,7 @@ class SocketService {
     return SocketService.instance;
   }
 
-  connect(serverUrl = socketURL) {
+  connect(serverUrl = process.env.REACT_APP_SERVER_SOCKET_URL) {
     if (this.socket?.connected) {
       console.warn("Socket is already connected");
       return;
