@@ -1,9 +1,6 @@
 import { io } from "socket.io-client";
 
-const socketURL =
-  process.env.RAILWAY_ENVIRONMENT_NAME === "production"
-    ? "wss://byt-server-production.up.railway.app"
-    : "ws://localhost:3000";
+const socketURL = "wss://fcc-byt.railway.internal";
 
 class SocketService {
   static instance = null;
