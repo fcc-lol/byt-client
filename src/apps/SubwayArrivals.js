@@ -1,3 +1,5 @@
+// Configure at https://subway-sign.danzaharia.com/sign/leom
+
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Rows from "../components/Rows";
@@ -27,7 +29,7 @@ const Bullet = styled.div`
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 6rem;
+  font-size: 5.25rem;
   flex-shrink: 0;
   font-family: "Helvetica", sans-serif;
 `;
@@ -46,30 +48,53 @@ const Time = styled(Description)`
 `;
 
 // Map route IDs to colors
+// Official MTA colors from NYC Transit Authority
 const routeColors = {
-  G: "#6CBE45", // Green
-  E: "#2185D0", // Blue
-  F: "#F2711C", // Orange
-  A: "#2185D0", // Blue
-  C: "#2185D0", // Blue
-  B: "#F2711C", // Orange
-  D: "#F2711C", // Orange
-  N: "#FBBD08", // Yellow
-  Q: "#FBBD08", // Yellow
-  R: "#FBBD08", // Yellow
-  1: "#DB2828", // Red
-  2: "#DB2828", // Red
-  3: "#DB2828", // Red
-  4: "#21BA45", // Green
-  5: "#21BA45", // Green
-  6: "#21BA45", // Green
-  7: "#A333C8", // Purple
-  L: "#767676", // Gray
-  J: "#A5673F", // Brown
-  Z: "#A5673F", // Brown
-  M: "#A5673F", // Brown
-  W: "#FBBD08", // Yellow
-  S: "#767676" // Gray
+  // Blue
+  A: "#0039A6",
+  C: "#0039A6",
+  E: "#0039A6",
+
+  // Orange
+  B: "#FF6319",
+  D: "#FF6319",
+  F: "#FF6319",
+  M: "#FF6319",
+
+  // Green
+  G: "#6CBE45",
+
+  // Brown
+  J: "#996633",
+  Z: "#996633",
+
+  // Gray
+  L: "#A7A9AC",
+
+  // Dark gray
+  S: "#808183",
+
+  // Yellow
+  N: "#FCCC0A",
+  Q: "#FCCC0A",
+  R: "#FCCC0A",
+  W: "#FCCC0A",
+
+  // Teal
+  T: "#00ADD0",
+
+  // Red
+  1: "#EE352E",
+  2: "#EE352E",
+  3: "#EE352E",
+
+  // Green
+  4: "#00933C",
+  5: "#00933C",
+  6: "#00933C",
+
+  // Purple
+  7: "#B933AD"
 };
 
 const SubwayArrivals = () => {
@@ -77,6 +102,8 @@ const SubwayArrivals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rotatingIndex, setRotatingIndex] = useState(0);
+  const [shouldRotate, setShouldRotate] = useState(false);
+  const [rotationTime, setRotationTime] = useState(3000);
 
   useEffect(() => {
     const fetchArrivals = async () => {
@@ -91,6 +118,14 @@ const SubwayArrivals = () => {
         }
 
         const data = await response.json();
+
+        // Get configuration from first item
+        const config = data[0] || {};
+        setShouldRotate(!!config.rotating);
+        // Set rotation time if provided, otherwise keep default
+        if (config.rotationTime) {
+          setRotationTime(config.rotationTime * 1000); // Convert seconds to milliseconds
+        }
 
         // Filter out the first item which contains configuration
         const arrivalData = data.filter((item, index) => index > 0);
@@ -116,9 +151,9 @@ const SubwayArrivals = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Rotate through the remaining arrivals every 3 seconds
+  // Rotate through the remaining arrivals using the configured rotation time
   useEffect(() => {
-    if (arrivals.length <= 1) return;
+    if (!shouldRotate || arrivals.length <= 1) return;
 
     // Initialize with index 1 (which will show as position 2)
     setRotatingIndex(1);
@@ -129,10 +164,10 @@ const SubwayArrivals = () => {
         const nextIndex = prevIndex + 1;
         return nextIndex >= arrivals.length ? 1 : nextIndex;
       });
-    }, 3000);
+    }, rotationTime);
 
     return () => clearInterval(rotationInterval);
-  }, [arrivals.length]);
+  }, [arrivals.length, shouldRotate, rotationTime]);
 
   // Render the first arrival and the currently rotating arrival
   const renderArrival = (arrival, isNext = false, index = null) => {
@@ -169,6 +204,10 @@ const SubwayArrivals = () => {
       )}
       {arrivals.length > 0 && renderArrival(arrivals[0], true)}
       {arrivals.length > 1 &&
+        !shouldRotate &&
+        renderArrival(arrivals[1], false, 1)}
+      {arrivals.length > 1 &&
+        shouldRotate &&
         renderArrival(arrivals[rotatingIndex], false, rotatingIndex)}
     </Rows>
   );
