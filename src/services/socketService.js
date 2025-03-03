@@ -33,12 +33,14 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
+      console.log(
+        `✅ Connected to socket server at ${process.env.REACT_APP_SERVER_SOCKET_URL}`
+      );
       this.reconnectAttempts = 0;
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log(`Disconnected from WebSocket server: ${reason}`);
+      console.log(`❌ Disconnected from socket server: ${reason}`);
     });
 
     this.socket.on("notification", (notification) => {
@@ -46,11 +48,11 @@ class SocketService {
     });
 
     this.socket.on("connect_error", (error) => {
-      console.error("Connection error:", error);
+      console.error(`⚠️ Socket server connection error: ${error.message}`);
       this.reconnectAttempts++;
 
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.error("Max reconnection attempts reached");
+        console.error("⚠️ Max socket server reconnection attempts reached");
         this.disconnect();
       }
     });
