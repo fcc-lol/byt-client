@@ -48,7 +48,7 @@ const Time = styled(Description)`
 `;
 
 // Map route IDs to colors
-// Official MTA colors from NYC Transit Authority
+// Official MTA colors from https://data.ny.gov/Transportation/MTA-Colors/3uhz-sej2
 const routeColors = {
   // Blue
   A: "#0039A6",
