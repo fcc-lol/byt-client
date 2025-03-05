@@ -2,22 +2,28 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
   faChevronLeft,
-  faChevronRight,
-  faRotate
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 
 import Icon from "./components/Icon";
 import NotificationCenter from "./components/NotificationCenter";
+
+const Body = styled.div`
+  width: 100%;
+  height: 100%;
+  background: #000000;
+`;
+
 const Screen = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
   width: 100%;
+  height: calc(100% - 16px);
   background: #000000;
   top: 0;
   left: 0;
-  gap: 2rem;
+  padding-top: 18px;
   position: absolute;
   overflow: hidden;
 
@@ -39,57 +45,32 @@ const AppContent = styled.div`
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  min-width: 0; // Allow flex items to shrink below content size
+  min-width: 0;
 `;
 
 const AppSwitcherButton = styled.button`
-  background: rgba(255, 255, 255, 0.1);
+  background: #000000;
   color: white;
   border: none;
-  width: 5rem;
+  width: 8rem;
   height: 100%;
-  border-radius: ${(props) => props.theme.borderRadius.large};
-  font-size: 1.5rem;
+  font-size: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.25s, transform 0.25s;
+  transition: opacity 0.25s;
   flex-shrink: 0;
+  opacity: 0.5;
 
   &:active {
-    background: rgba(255, 255, 255, 0.2);
+    opacity: 1;
   }
 
   &:disabled {
     opacity: 0.3;
     cursor: not-allowed;
     transform: none;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const RefreshButton = styled.button`
-  position: fixed;
-  top: 1.25rem;
-  left: 1.25rem;
-  padding: 2rem;
-  font-size: 3rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 1);
-  border: none;
-  border-radius: ${(props) => props.theme.borderRadius.large};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  z-index: 1000;
-  transition: background 0.25s;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.2);
   }
 
   &:focus {
@@ -199,10 +180,6 @@ function SpringBoard() {
     setCurrentApp((current) => (current === apps.length - 1 ? 0 : current + 1));
   };
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
   if (apps.length === 0) {
     return <AppContent>Loading apps...</AppContent>;
   }
@@ -221,14 +198,9 @@ function SpringBoard() {
   );
 
   return (
-    <>
+    <Body>
       {isDevice ? (
-        <Screen $hidePointer={true}>
-          <RefreshButton onClick={handleRefresh} className="refresh-button">
-            <Icon icon={faRotate} />
-          </RefreshButton>
-          {content}
-        </Screen>
+        <Screen $hidePointer={true}>{content}</Screen>
       ) : (
         <SimulatorContainer>
           <Simulator
@@ -240,7 +212,7 @@ function SpringBoard() {
           </Simulator>
         </SimulatorContainer>
       )}
-    </>
+    </Body>
   );
 }
 
