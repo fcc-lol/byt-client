@@ -4,33 +4,37 @@ import Rows from "../components/Rows";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import Description from "../components/Description";
 
 const ColorPalette = () => {
-  const [palette, setPalette] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setRandomColor] = useState(null);
+  const [colorScheme, setColorScheme] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const fetchPalette = async () => {
+  const generateRandomColor = async () => {
     setLoading(true);
     try {
-      const timestamp = Date.now();
+      const letters = "89ABCDEF";
+      let color = "";
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * letters.length)];
+      }
+
+      setRandomColor(color);
+
       const response = await fetch(
-        `https://api.allorigins.win/get?url=${encodeURIComponent(
-          `https://www.colourlovers.com/api/palettes/random?format=json&_=${timestamp}`
-        )}`
+        `https://www.thecolorapi.com/scheme?hex=${color}&format=json&count=5&mode=analogic`
       );
       const data = await response.json();
-      const [randomPalette] = JSON.parse(data.contents);
-      setPalette(randomPalette);
+      setColorScheme(data.colors);
     } catch (error) {
-      console.error("Error fetching palette:", error);
+      console.error("Error fetching color scheme:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPalette();
+    generateRandomColor();
   }, []);
 
   return (
@@ -39,23 +43,19 @@ const ColorPalette = () => {
         <Card>
           <Label>Loading...</Label>
         </Card>
-      ) : palette ? (
-        <Rows onClick={fetchPalette}>
-          <Columns>
-            {palette.colors.map((color, index) => (
-              <Card key={index} style={{ backgroundColor: `#${color}` }} />
-            ))}
-          </Columns>
-          <Card>
-            <Description>
-              {palette.title} by {palette.userName}
-            </Description>
-          </Card>
-        </Rows>
       ) : (
-        <Card>
-          <Label>Failed to load palette</Label>
-        </Card>
+        colorScheme && (
+          <Rows>
+            <Columns>
+              {colorScheme.map((color, index) => (
+                <Card
+                  key={index}
+                  style={{ backgroundColor: color.hex.value }}
+                />
+              ))}
+            </Columns>
+          </Rows>
+        )
       )}
     </Columns>
   );
