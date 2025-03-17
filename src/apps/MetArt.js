@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import Label from "../components/Label";
+import LoadingCard from "../components/LoadingCard";
 import {
   DataTable,
   DataRow,
@@ -12,7 +12,7 @@ import {
 } from "../components/DataTable";
 
 const ImageContainer = styled.div`
-  max-width: 60%;
+  width: 40%;
   height: 100%;
   display: flex;
   align-items: center;
@@ -42,7 +42,7 @@ const MetArt = () => {
   const MAX_RETRIES = 10;
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [, setFailedAttempts] = useState(0);
   const [objectIDs, setObjectIDs] = useState(null);
 
   const fetchArtwork = async (objectId) => {
@@ -145,70 +145,58 @@ const MetArt = () => {
     }
   };
 
+  if (loading) {
+    return <LoadingCard message="Random Met Art" />;
+  }
+
   return (
-    <Columns onClick={() => fetchRandomArtwork(0)}>
-      {loading ? (
-        <Card>
-          <Label>Loading...</Label>
-        </Card>
-      ) : artwork ? (
-        <Columns>
-          <ImageContainer>
-            <ArtImage src={artwork.primaryImageSmall} alt={artwork.title} />
-          </ImageContainer>
-          <InfoContainer>
-            <DataTable>
-              {artwork.title && (
-                <DataRow>
-                  <DataKey>Title</DataKey>
-                  <DataValue>{artwork.title}</DataValue>
-                </DataRow>
-              )}
-              {artwork.artistDisplayName && (
-                <DataRow>
-                  <DataKey>Artist</DataKey>
-                  <DataValue>{artwork.artistDisplayName}</DataValue>
-                </DataRow>
-              )}
-              {artwork.objectDate && (
-                <DataRow>
-                  <DataKey>Date</DataKey>
-                  <DataValue>{artwork.objectDate}</DataValue>
-                </DataRow>
-              )}
-              {artwork.medium && (
-                <DataRow>
-                  <DataKey>Medium</DataKey>
-                  <DataValue>{artwork.medium}</DataValue>
-                </DataRow>
-              )}
-              {artwork.region && (
-                <DataRow>
-                  <DataKey>Region</DataKey>
-                  <DataValue>{artwork.region}</DataValue>
-                </DataRow>
-              )}
-              {artwork.culture && (
-                <DataRow>
-                  <DataKey>Culture</DataKey>
-                  <DataValue>{artwork.culture}</DataValue>
-                </DataRow>
-              )}
-            </DataTable>
-          </InfoContainer>
-        </Columns>
-      ) : failedAttempts >= MAX_RETRIES ? (
-        <Card>
-          <Label>Failed to load artwork after {failedAttempts} attempts</Label>
-        </Card>
-      ) : (
-        <Card>
-          <Label>
-            Loading... Attempt {failedAttempts + 1}/{MAX_RETRIES}
-          </Label>
-        </Card>
-      )}
-    </Columns>
+    artwork && (
+      <Columns onClick={() => fetchRandomArtwork(0)}>
+        <ImageContainer>
+          <ArtImage src={artwork.primaryImageSmall} alt={artwork.title} />
+        </ImageContainer>
+        <InfoContainer>
+          <DataTable>
+            {artwork.title && (
+              <DataRow>
+                <DataKey>Title</DataKey>
+                <DataValue>{artwork.title}</DataValue>
+              </DataRow>
+            )}
+            {artwork.artistDisplayName && (
+              <DataRow>
+                <DataKey>Artist</DataKey>
+                <DataValue>{artwork.artistDisplayName}</DataValue>
+              </DataRow>
+            )}
+            {artwork.objectDate && (
+              <DataRow>
+                <DataKey>Date</DataKey>
+                <DataValue>{artwork.objectDate}</DataValue>
+              </DataRow>
+            )}
+            {artwork.medium && (
+              <DataRow>
+                <DataKey>Medium</DataKey>
+                <DataValue>{artwork.medium}</DataValue>
+              </DataRow>
+            )}
+            {artwork.region && (
+              <DataRow>
+                <DataKey>Region</DataKey>
+                <DataValue>{artwork.region}</DataValue>
+              </DataRow>
+            )}
+            {artwork.culture && (
+              <DataRow>
+                <DataKey>Culture</DataKey>
+                <DataValue>{artwork.culture}</DataValue>
+              </DataRow>
+            )}
+          </DataTable>
+        </InfoContainer>
+      </Columns>
+    )
   );
 };
 

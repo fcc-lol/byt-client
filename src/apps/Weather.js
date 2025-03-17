@@ -6,7 +6,6 @@ import {
   faCloudRain,
   faSnowflake,
   faSmog,
-  faCompass,
   faCloudBolt,
   faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
@@ -16,7 +15,7 @@ import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Value from "../components/Value";
-
+import LoadingCard from "../components/LoadingCard";
 const BigIcon = styled(Icon)`
   font-size: 8rem;
   margin: 1rem 0;
@@ -90,13 +89,7 @@ export const Weather = () => {
   }, []);
 
   if (loading) {
-    return (
-      <Columns>
-        <Card>
-          <BigIcon icon={faCompass} spin disabled />
-        </Card>
-      </Columns>
-    );
+    return <LoadingCard message="Current Weather" />;
   }
 
   if (error) {
@@ -109,20 +102,20 @@ export const Weather = () => {
     );
   }
 
-  if (!weather) return null;
-
   return (
-    <Columns>
-      <Card>
-        <Value>NYC</Value>
-      </Card>
-      <Card>
-        <BigIcon icon={getWeatherIcon(weather.WeatherIcon)} />
-        <Label>{weather.WeatherText}</Label>
-      </Card>
-      <Card>
-        <Value>{Math.round(weather.Temperature.Imperial.Value)}°F</Value>
-      </Card>
-    </Columns>
+    weather && (
+      <Columns>
+        <Card>
+          <Value>NYC</Value>
+        </Card>
+        <Card>
+          <BigIcon icon={getWeatherIcon(weather.WeatherIcon)} />
+          <Label>{weather.WeatherText}</Label>
+        </Card>
+        <Card>
+          <Value>{Math.round(weather.Temperature.Imperial.Value)}°F</Value>
+        </Card>
+      </Columns>
+    )
   );
 };

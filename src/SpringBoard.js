@@ -7,6 +7,7 @@ import {
 
 import Icon from "./components/Icon";
 import NotificationCenter from "./components/NotificationCenter";
+import LoadingCard from "./components/LoadingCard";
 
 const Body = styled.div`
   width: 100%;
@@ -181,7 +182,7 @@ function SpringBoard() {
   };
 
   if (apps.length === 0) {
-    return <AppContent>Loading apps...</AppContent>;
+    return <LoadingCard message="Loading apps" />;
   }
 
   const content = (

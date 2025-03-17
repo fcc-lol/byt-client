@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 
 import Card from "../components/Card";
-import Label from "../components/Label";
+import LoadingCard from "../components/LoadingCard";
 
 const CatImage = styled.img`
   width: 100%;
@@ -12,10 +12,10 @@ const CatImage = styled.img`
 
 const CatImages = () => {
   const [catImage, setCatImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchCatImage = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const response = await fetch(
         "https://api.thecatapi.com/v1/images/search"
@@ -25,7 +25,7 @@ const CatImages = () => {
     } catch (error) {
       console.error("Error fetching cat image:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -33,12 +33,8 @@ const CatImages = () => {
     fetchCatImage();
   }, []);
 
-  if (loading) {
-    return (
-      <Card>
-        <Label>Loading...</Label>
-      </Card>
-    );
+  if (isLoading) {
+    return <LoadingCard message="Random Cat Image" />;
   }
 
   return (

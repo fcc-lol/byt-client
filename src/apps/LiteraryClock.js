@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
+import LoadingCard from "../components/LoadingCard";
 
 const QuoteContainer = styled.div`
   margin-bottom: 1rem;
@@ -79,6 +80,7 @@ const LiteraryClock = () => {
     return new Date();
   });
   const [quote, setQuote] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const currentMinuteRef = useRef(time.getMinutes());
   const containerRef = useRef(null);
   const isTimeOverridden = useRef(
@@ -227,6 +229,7 @@ const LiteraryClock = () => {
   };
 
   const fetchQuote = async (hours, minutes) => {
+    setIsLoading(true);
     try {
       const paddedHours = hours.toString().padStart(2, "0");
       const paddedMinutes = minutes.toString().padStart(2, "0");
@@ -330,6 +333,8 @@ const LiteraryClock = () => {
       setQuote(randomQuote);
     } catch (error) {
       console.error("Error fetching quote:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -357,6 +362,10 @@ const LiteraryClock = () => {
     fetchQuote(time.getHours(), time.getMinutes());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (isLoading) {
+    return <LoadingCard message="Literary Clock" />;
+  }
 
   return (
     <Columns>

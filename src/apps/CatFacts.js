@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 
 import Card from "../components/Card";
 import Label from "../components/Label";
+import LoadingCard from "../components/LoadingCard";
 
 const CenteredLabel = styled(Label)`
   font-weight: 400;
   text-align: center;
   padding: 0 5rem;
   font-size: ${(props) => {
-    if (props.isLoading) return "4rem";
-    const length = props.factLength || 0;
+    const length = props.$length || 0;
     if (length < 50) return "5rem";
     if (length < 80) return "4.5rem";
     if (length < 100) return "4rem";
@@ -58,12 +58,16 @@ const CatFacts = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (isLoading) {
+    return <LoadingCard message="Random Cat Fact" />;
+  }
+
   return (
-    <Card onClick={fetchNewFact}>
-      <CenteredLabel isLoading={isLoading} factLength={fact.length}>
-        {isLoading ? "Loading..." : fact}
-      </CenteredLabel>
-    </Card>
+    fact && (
+      <Card onClick={fetchNewFact}>
+        <CenteredLabel $length={fact.length}>{fact}</CenteredLabel>
+      </Card>
+    )
   );
 };
 

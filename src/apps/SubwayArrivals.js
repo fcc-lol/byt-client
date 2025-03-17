@@ -6,7 +6,7 @@ import Rows from "../components/Rows";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Description from "../components/Description";
-
+import LoadingCard from "../components/LoadingCard";
 const Sign = styled(Card)`
   flex-direction: row;
   width: 100%;
@@ -99,8 +99,7 @@ const routeColors = {
 
 const SubwayArrivals = () => {
   const [arrivals, setArrivals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [rotatingIndex, setRotatingIndex] = useState(0);
   const [shouldRotate, setShouldRotate] = useState(false);
   const [rotationTime, setRotationTime] = useState(3000);
@@ -108,7 +107,7 @@ const SubwayArrivals = () => {
   useEffect(() => {
     const fetchArrivals = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         const response = await fetch(
           "https://subway-arrivals.herokuapp.com/sign/leom"
         );
@@ -134,12 +133,10 @@ const SubwayArrivals = () => {
         arrivalData.sort((a, b) => a.minutesUntil - b.minutesUntil);
 
         setArrivals(arrivalData);
-        setError(null);
       } catch (err) {
         console.error("Error fetching subway arrivals:", err);
-        setError("Failed to load subway arrivals. Please try again later.");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -190,26 +187,22 @@ const SubwayArrivals = () => {
     );
   };
 
+  if (isLoading) {
+    return <LoadingCard message="Next Subway Arrivals" />;
+  }
+
   return (
-    <Rows>
-      {loading && arrivals.length === 0 && (
-        <Card>
-          <Label>Loading...</Label>
-        </Card>
-      )}
-      {error && (
-        <Card>
-          <Label>{error}</Label>
-        </Card>
-      )}
-      {arrivals.length > 0 && renderArrival(arrivals[0], true)}
-      {arrivals.length > 1 &&
-        !shouldRotate &&
-        renderArrival(arrivals[1], false, 1)}
-      {arrivals.length > 1 &&
-        shouldRotate &&
-        renderArrival(arrivals[rotatingIndex], false, rotatingIndex)}
-    </Rows>
+    arrivals.length > 0 && (
+      <Rows>
+        {arrivals.length > 0 && renderArrival(arrivals[0], true)}
+        {arrivals.length > 1 &&
+          !shouldRotate &&
+          renderArrival(arrivals[1], false, 1)}
+        {arrivals.length > 1 &&
+          shouldRotate &&
+          renderArrival(arrivals[rotatingIndex], false, rotatingIndex)}
+      </Rows>
+    )
   );
 };
 

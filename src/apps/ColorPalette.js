@@ -3,15 +3,15 @@ import { useState, useEffect } from "react";
 import Rows from "../components/Rows";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import Label from "../components/Label";
+import LoadingCard from "../components/LoadingCard";
 
 const ColorPalette = () => {
   const [, setRandomColor] = useState(null);
   const [colorScheme, setColorScheme] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const generateRandomColor = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const letters = "89ABCDEF";
       let color = "";
@@ -29,7 +29,7 @@ const ColorPalette = () => {
     } catch (error) {
       console.error("Error fetching color scheme:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -37,27 +37,20 @@ const ColorPalette = () => {
     generateRandomColor();
   }, []);
 
+  if (isLoading) {
+    return <LoadingCard message="Random Color Palette" />;
+  }
+
   return (
-    <Columns>
-      {loading ? (
-        <Card>
-          <Label>Loading...</Label>
-        </Card>
-      ) : (
-        colorScheme && (
-          <Rows>
-            <Columns>
-              {colorScheme.map((color, index) => (
-                <Card
-                  key={index}
-                  style={{ backgroundColor: color.hex.value }}
-                />
-              ))}
-            </Columns>
-          </Rows>
-        )
-      )}
-    </Columns>
+    colorScheme && (
+      <Rows onClick={generateRandomColor}>
+        <Columns>
+          {colorScheme.map((color, index) => (
+            <Card key={index} style={{ backgroundColor: color.hex.value }} />
+          ))}
+        </Columns>
+      </Rows>
+    )
   );
 };
 

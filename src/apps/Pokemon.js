@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-
+import LoadingCard from "../components/LoadingCard";
 import {
   DataTable,
   DataRow,
@@ -92,10 +92,10 @@ const TypeBadge = styled.span`
 
 const Pokemon = () => {
   const [pokemon, setPokemon] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchRandomPokemon = async () => {
-    setLoading(true);
+    setIsLoading(true);
     let attempts = 0;
     const maxAttempts = 10;
 
@@ -127,19 +127,15 @@ const Pokemon = () => {
       console.error("Failed to fetch Pokemon after", maxAttempts, "attempts");
     }
 
-    setLoading(false);
+    setIsLoading(false);
   };
 
   useEffect(() => {
     fetchRandomPokemon();
   }, []);
 
-  if (loading) {
-    return (
-      <Card>
-        <Label>Loading...</Label>
-      </Card>
-    );
+  if (isLoading) {
+    return <LoadingCard message="Random Pokemon" />;
   }
 
   return (
