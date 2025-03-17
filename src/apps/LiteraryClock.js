@@ -6,7 +6,7 @@ import Card from "../components/Card";
 
 const QuoteContainer = styled.div`
   margin-bottom: 1rem;
-  padding: 0 6rem;
+  padding: 0 10rem;
   text-align: center;
   font-family: "Space Mono", monospace;
   text-transform: uppercase;
@@ -85,6 +85,30 @@ const LiteraryClock = () => {
     !!new URLSearchParams(window.location.search).get("time")
   );
 
+  const hasEndingEllipsis = (text) => text.trim().endsWith("...");
+  const hasStartingEllipsis = (text) => text.trim().startsWith("...");
+  const isJustPeriod = (text) => /^\s*\.\s*$/.test(text);
+  const isTimeNumeric = (text) => /\d/.test(text);
+  const hasTrailingQuote = (text) => {
+    const trimmed = text.trim();
+    // First remove any existing ellipsis to check for quote
+    const withoutEllipsis = trimmed.replace(/\.{3}$/, "");
+    // Match any of the possible apostrophe characters
+    return /\w[\u0027\u2019\u02BC\u02B9\u2032]$/.test(withoutEllipsis);
+  };
+  const removeTrailingQuote = (text) => {
+    const trimmed = text.trim();
+    // First remove ellipsis if it exists
+    const withoutEllipsis = trimmed.replace(/\.{3}$/, "");
+    // Remove any of the possible apostrophe characters
+    const withoutQuote = withoutEllipsis.replace(
+      /(\w)[\u0027\u2019\u02BC\u02B9\u2032]$/,
+      "$1"
+    );
+    // Add back ellipsis if it was there
+    return trimmed.endsWith("...") ? withoutQuote + "..." : withoutQuote;
+  };
+
   const preserveSpaces = (text) => {
     // Preserve leading and trailing spaces by handling them separately
     const leadingSpaces = text.match(/^\s*/)[0];
@@ -105,7 +129,7 @@ const LiteraryClock = () => {
   };
 
   const truncateText = (text, maxLength, truncateFromStart = true) => {
-    if (!text) return { text: "", needsEllipsis: false };
+    if (!text) return { text: "", needsEllipsis: true };
 
     // Extract trailing space to preserve it
     const trailingSpace = truncateFromStart ? " " : text.match(/\s*$/)[0];
@@ -115,11 +139,20 @@ const LiteraryClock = () => {
       text.length - trailingSpace.length
     );
 
+    // Check for existing ellipsis
+    const hasExistingStartEllipsis = textWithoutSpaces.startsWith("...");
+    const hasExistingEndEllipsis = textWithoutSpaces.endsWith("...");
+
     // If the text is already short enough, return it as is
     if (textWithoutSpaces.length <= maxLength) {
+      let finalText = text.trim();
+      // Remove trailing quote if it exists and we're truncating from the end
+      if (!truncateFromStart && hasTrailingQuote(finalText)) {
+        finalText = removeTrailingQuote(finalText);
+      }
       return {
-        text: text.trim(),
-        needsEllipsis: false
+        text: finalText,
+        needsEllipsis: true
       };
     }
 
@@ -135,11 +168,26 @@ const LiteraryClock = () => {
 
       // For very long words, we'll need to break them
       if (word.length > maxLength - 4) {
-        // -4 for ellipsis and space
         if (truncateFromStart) {
-          result = "..." + word.slice(-maxLength + 4) + result;
+          // If starting with ellipsis, preserve it
+          const sliceStart = hasExistingStartEllipsis ? 3 : 0;
+          result =
+            (hasExistingStartEllipsis ? "..." : "...") +
+            word.slice(sliceStart, -maxLength + 4) +
+            result;
         } else {
-          result = result + word.slice(0, maxLength - 4) + "...";
+          // If ending with ellipsis, preserve it
+          const sliceEnd = hasExistingEndEllipsis ? -3 : undefined;
+          let truncatedWord = word.slice(
+            0,
+            sliceEnd ? maxLength - 4 + sliceEnd : maxLength - 4
+          );
+          // Remove trailing quote if present
+          if (hasTrailingQuote(truncatedWord)) {
+            truncatedWord = removeTrailingQuote(truncatedWord);
+          }
+          result =
+            result + truncatedWord + (hasExistingEndEllipsis ? "..." : "...");
         }
         break;
       }
@@ -158,8 +206,22 @@ const LiteraryClock = () => {
       }
     }
 
+    // Remove trailing quote if present and we're truncating from the end
+    if (!truncateFromStart && hasTrailingQuote(result)) {
+      result = removeTrailingQuote(result);
+    }
+
+    // Check one final time for trailing quote before preserving spaces
+    const finalResult = preserveSpaces(result).trim();
+    if (!truncateFromStart && hasTrailingQuote(finalResult)) {
+      return {
+        text: removeTrailingQuote(finalResult),
+        needsEllipsis: true
+      };
+    }
+
     return {
-      text: preserveSpaces(result).trim(),
+      text: finalResult,
       needsEllipsis: true
     };
   };
@@ -175,18 +237,29 @@ const LiteraryClock = () => {
       );
       const { contents } = await response.json();
       const quotes = JSON.parse(contents);
-      const sfwQuotes = quotes.filter((q) => q.sfw === "yes");
+      // First try to get SFW quotes
+      let sfwQuotes = quotes.filter((q) => q.sfw === "yes");
 
-      // Sort quotes by total length and pick the longest one
-      const randomQuote = sfwQuotes.sort((a, b) => {
-        const lengthA =
-          (a.quote_first || "").length + (a.quote_last || "").length;
-        const lengthB =
-          (b.quote_first || "").length + (b.quote_last || "").length;
-        return lengthB - lengthA;
-      })[0];
+      // If no SFW quotes are available, fall back to all quotes
+      if (sfwQuotes.length === 0) {
+        sfwQuotes = quotes;
+      }
 
-      // Clean br tags but preserve spaces
+      // Separate quotes into those with written-out times and numeric times
+      const writtenTimeQuotes = sfwQuotes.filter(
+        (q) => !isTimeNumeric(q.quote_time_case)
+      );
+      const numericTimeQuotes = sfwQuotes.filter((q) =>
+        isTimeNumeric(q.quote_time_case)
+      );
+
+      // Pick from written-out times if available, otherwise fall back to numeric times
+      const quotePool =
+        writtenTimeQuotes.length > 0 ? writtenTimeQuotes : numericTimeQuotes;
+      const randomQuote =
+        quotePool[Math.floor(Math.random() * quotePool.length)];
+
+      // Clean br tags and preserve spaces
       randomQuote.quote_first = (randomQuote.quote_first || "")
         .replace(/<br\/?>/g, " ")
         .replace(/^\s+/, ""); // Remove leading spaces
@@ -200,17 +273,20 @@ const LiteraryClock = () => {
         "$1:$2"
       );
 
-      // Fixed width for monospace font - slightly reduced from 32 to ensure 3-line fit
-      const charsPerLine = 28;
+      // Fixed width for monospace font
+      const charsPerLine = 25;
+      const ellipsisLength = 3; // Length of "..."
 
       // Calculate maximum available space (all 3 lines)
       const maxTotalLength = charsPerLine * 3;
 
-      // Calculate space needed for time part (just the actual length plus minimal spacing)
+      // Calculate space needed for time part and ellipsis (at both ends)
       const timePartLength = randomQuote.quote_time_case.length + 2; // Add 2 for minimal spacing
+      const totalEllipsisLength = ellipsisLength * 2; // Both start and end ellipsis
 
       // Calculate available space for text parts (use remaining space)
-      const availableSpace = maxTotalLength - timePartLength;
+      const availableSpace =
+        maxTotalLength - timePartLength - totalEllipsisLength;
 
       // Allocate space proportionally based on original lengths
       const originalFirstLength = (randomQuote.quote_first || "").length;
@@ -243,21 +319,13 @@ const LiteraryClock = () => {
         false
       );
 
-      // Set the parts and ellipsis flags
+      // Set the parts
       randomQuote.quote_first = firstPart.text;
       randomQuote.quote_last = lastPart.text;
 
       // Only set ellipsis flags if we actually had to truncate
       randomQuote.needsEllipsisFront = firstPart.needsEllipsis;
       randomQuote.needsEllipsisBack = lastPart.needsEllipsis;
-
-      // Ensure time part fits
-      if (randomQuote.quote_time_case.length > charsPerLine) {
-        randomQuote.quote_time_case = randomQuote.quote_time_case.substring(
-          0,
-          charsPerLine
-        );
-      }
 
       setQuote(randomQuote);
     } catch (error) {
@@ -298,11 +366,17 @@ const LiteraryClock = () => {
             <QuoteContainer ref={containerRef}>
               <QuoteText>
                 <QuotePart>
-                  {quote.needsEllipsisFront && <Ellipsis>...</Ellipsis>}
+                  {!hasStartingEllipsis(quote.quote_first) && (
+                    <Ellipsis>...</Ellipsis>
+                  )}
                   {quote.quote_first}
-                  <TimeText>&nbsp;{quote.quote_time_case}&nbsp;</TimeText>
-                  {quote.quote_last}
-                  {quote.needsEllipsisBack && <Ellipsis>...</Ellipsis>}
+                  <TimeText>
+                    &nbsp;{quote.quote_time_case}
+                    {!isJustPeriod(quote.quote_last) && "\u00A0"}
+                  </TimeText>
+                  {!isJustPeriod(quote.quote_last) && quote.quote_last}
+                  {(!hasEndingEllipsis(quote.quote_last) ||
+                    isJustPeriod(quote.quote_last)) && <Ellipsis>...</Ellipsis>}
                 </QuotePart>
               </QuoteText>
             </QuoteContainer>
