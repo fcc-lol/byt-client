@@ -4,6 +4,12 @@ import styled from "styled-components";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
+import {
+  DataTable,
+  DataRow,
+  DataKey,
+  DataValue
+} from "../components/DataTable";
 
 const ImageContainer = styled.div`
   max-width: 60%;
@@ -30,40 +36,6 @@ const InfoContainer = styled(Card)`
   overflow: hidden;
   height: 100%;
   overflow-y: auto;
-`;
-
-const DataTable = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  font-family: "Space Mono", monospace;
-  text-transform: uppercase;
-  padding: 2rem;
-`;
-
-const DataRow = styled.div`
-  display: flex;
-  width: 100%;
-  gap: 1rem;
-`;
-
-const DataKey = styled.div`
-  font-size: 2rem;
-  width: 10rem;
-  flex-shrink: 0;
-  text-align: left;
-  color: rgba(255, 255, 255, 0.5);
-`;
-
-const DataValue = styled.div`
-  font-size: 2rem;
-  flex: 1;
-  min-width: 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: left;
 `;
 
 const MetArt = () => {
