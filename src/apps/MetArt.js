@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -39,22 +40,16 @@ const InfoContainer = styled(Card)`
 `;
 
 const MetArt = () => {
-  const MAX_RETRIES = 10;
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
   const [objectIDs, setObjectIDs] = useState(null);
 
   const fetchArtwork = async (objectId) => {
-    try {
-      const artworkResponse = await fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
-      );
-      const artworkData = await artworkResponse.json();
-      return artworkData;
-    } catch (error) {
-      console.error(`Error fetching artwork ${objectId}:`, error);
-      return null;
-    }
+    const response = await fetch(
+      `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
+    );
+    const artworkData = await response.json();
+    return artworkData;
   };
 
   useEffect(() => {
@@ -105,28 +100,22 @@ const MetArt = () => {
         return;
       }
 
-      let attempts = 0;
-      while (attempts < MAX_RETRIES) {
-        try {
-          const randomIndex = Math.floor(Math.random() * objectIDs.length);
+      const result = await fetchRandomWithRetry({
+        range: { min: 0, max: objectIDs.length - 1 },
+        fetch: async (randomIndex) => {
           const objectId = objectIDs[randomIndex];
-          const artworkData = await fetchArtwork(objectId);
-
-          if (artworkData?.primaryImageSmall) {
-            setArtwork(artworkData);
-            break;
-          }
-        } catch (error) {
-          console.error(
-            `Error fetching artwork (attempt ${attempts + 1}):`,
-            error
-          );
+          return fetchArtwork(objectId);
+        },
+        validate: (data) => !!data?.primaryImageSmall,
+        failed: (attempt, error) => {
+          console.error(`Error fetching artwork (attempt ${attempt}):`, error);
         }
-        attempts++;
-      }
+      });
 
-      if (attempts === MAX_RETRIES) {
-        console.error("Failed to fetch artwork after", MAX_RETRIES, "attempts");
+      if (result.success) {
+        setArtwork(result.data);
+      } else {
+        console.error(result.error);
       }
     } catch (error) {
       console.error("Error in fetchRandomArtwork:", error);

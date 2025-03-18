@@ -4,6 +4,7 @@ import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import LoadingCard from "../components/LoadingCard";
+import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
 import {
   DataTable,
   DataRow,
@@ -96,35 +97,27 @@ const Pokemon = () => {
 
   const fetchRandomPokemon = async () => {
     setIsLoading(true);
-    let attempts = 0;
-    const maxAttempts = 10;
 
-    while (attempts < maxAttempts) {
-      try {
-        const randomId = Math.floor(Math.random() * 1302) + 1;
+    const result = await fetchRandomWithRetry({
+      range: { min: 1, max: 1302 },
+      fetch: async (randomId) => {
         const response = await fetch(
           `https://pokeapi.co/api/v2/pokemon/${randomId}`
         );
-
-        if (!response.ok) {
-          attempts++;
-          continue;
-        }
-
-        const data = await response.json();
-        setPokemon(data);
-        break;
-      } catch (error) {
-        console.error(
-          `Error fetching Pokemon (attempt ${attempts + 1}):`,
-          error
-        );
-        attempts++;
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+      },
+      validate: (data) => !!data,
+      failed: (attempt, error) => {
+        console.error(`Error fetching Pokemon (attempt ${attempt}):`, error);
       }
-    }
+    });
 
-    if (attempts === maxAttempts) {
-      console.error("Failed to fetch Pokemon after", maxAttempts, "attempts");
+    if (result.success) {
+      setPokemon(result.data);
+    } else {
+      console.error(result.error);
     }
 
     setIsLoading(false);
