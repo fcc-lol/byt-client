@@ -56,6 +56,7 @@ const FlightArrivals = () => {
   const [arrivals, setArrivals] = useState([]);
   const [departures, setDepartures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState(null);
   const [, setTime] = useState(Date.now());
 
@@ -66,7 +67,9 @@ const FlightArrivals = () => {
   }, []);
 
   const fetchFlights = async () => {
-    setIsLoading(true);
+    if (isInitialLoad) {
+      setIsLoading(true);
+    }
     setError(null);
 
     const fccApiKey = new URLSearchParams(window.location.search).get(
@@ -99,6 +102,9 @@ const FlightArrivals = () => {
 
       setArrivals(arrivalsData.arrivals || []);
       setDepartures(departuresData.departures || []);
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+      }
     } catch (error) {
       console.error("Error fetching flight data:", error);
       setError("Error fetching flight data");
@@ -111,6 +117,7 @@ const FlightArrivals = () => {
     fetchFlights();
     const interval = setInterval(fetchFlights, 60000); // Refresh every minute
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoading) {
