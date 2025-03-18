@@ -97,9 +97,6 @@ const FlightArrivals = () => {
         departuresResponse.json()
       ]);
 
-      console.log("Arrivals:", arrivalsData.arrivals);
-      console.log("Departures:", departuresData.departures);
-
       setArrivals(arrivalsData.arrivals || []);
       setDepartures(departuresData.departures || []);
     } catch (error) {
