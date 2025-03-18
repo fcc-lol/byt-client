@@ -42,7 +42,6 @@ const MetArt = () => {
   const MAX_RETRIES = 10;
   const [artwork, setArtwork] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [, setFailedAttempts] = useState(0);
   const [objectIDs, setObjectIDs] = useState(null);
 
   const fetchArtwork = async (objectId) => {
@@ -82,64 +81,55 @@ const MetArt = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [objectIDs]);
 
-  const fetchRandomArtwork = async (retryCount = 0) => {
-    // Reset failed attempts if this is a manual refresh (retryCount === 0)
-    if (retryCount === 0) {
-      setFailedAttempts(0);
-      setArtwork(null);
-    }
+  const fetchRandomArtwork = async () => {
     setLoading(true);
+    setArtwork(null);
+
     try {
+      // Check for specific object ID in URL
       const urlParams = new URLSearchParams(window.location.search);
       const specificObjectId = urlParams.get("objectId");
 
       if (specificObjectId) {
         const artworkData = await fetchArtwork(specificObjectId);
-        if (!artworkData || !artworkData.primaryImageSmall) {
-          setArtwork(null);
-          setFailedAttempts(MAX_RETRIES);
-        } else {
-          setArtwork(artworkData);
-          setFailedAttempts(0);
-        }
-        setLoading(false);
-        return;
-      }
-
-      if (!objectIDs) {
-        // We're still waiting for the objects list
-        setLoading(false);
-        return;
-      }
-
-      let currentAttempt = retryCount;
-      let foundArtwork = false;
-
-      while (currentAttempt < MAX_RETRIES && !foundArtwork) {
-        // Get a random object ID from our stored list and try to fetch artwork
-        const randomIndex = Math.floor(Math.random() * objectIDs.length);
-        const objectId = objectIDs[randomIndex];
-
-        const artworkData = await fetchArtwork(objectId);
-
         if (artworkData?.primaryImageSmall) {
           setArtwork(artworkData);
-          setFailedAttempts(0);
-          foundArtwork = true;
-        } else {
-          currentAttempt++;
-          setFailedAttempts(currentAttempt);
         }
+        setLoading(false);
+        return;
       }
 
-      if (!foundArtwork) {
-        setArtwork(null);
-        setFailedAttempts(MAX_RETRIES);
+      // Handle random artwork fetching
+      if (!objectIDs) {
+        setLoading(false);
+        return;
+      }
+
+      let attempts = 0;
+      while (attempts < MAX_RETRIES) {
+        try {
+          const randomIndex = Math.floor(Math.random() * objectIDs.length);
+          const objectId = objectIDs[randomIndex];
+          const artworkData = await fetchArtwork(objectId);
+
+          if (artworkData?.primaryImageSmall) {
+            setArtwork(artworkData);
+            break;
+          }
+        } catch (error) {
+          console.error(
+            `Error fetching artwork (attempt ${attempts + 1}):`,
+            error
+          );
+        }
+        attempts++;
+      }
+
+      if (attempts === MAX_RETRIES) {
+        console.error("Failed to fetch artwork after", MAX_RETRIES, "attempts");
       }
     } catch (error) {
-      console.error("Error fetching artwork:", error);
-      setArtwork(null);
-      setFailedAttempts(MAX_RETRIES);
+      console.error("Error in fetchRandomArtwork:", error);
     } finally {
       setLoading(false);
     }
@@ -151,7 +141,7 @@ const MetArt = () => {
 
   return (
     artwork && (
-      <Columns onClick={() => fetchRandomArtwork(0)}>
+      <Columns onClick={fetchRandomArtwork}>
         <ImageContainer>
           <ArtImage src={artwork.primaryImageSmall} alt={artwork.title} />
         </ImageContainer>
