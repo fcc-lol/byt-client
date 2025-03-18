@@ -6,6 +6,7 @@ class SocketService {
   notificationCallbacks = new Set();
   reconnectAttempts = 0;
   maxReconnectAttempts = 5;
+  serverUrl = process.env.REACT_APP_SERVER_SOCKET_URL;
 
   static getInstance() {
     if (!SocketService.instance) {
@@ -14,16 +15,18 @@ class SocketService {
     return SocketService.instance;
   }
 
-  connect(serverUrl = process.env.REACT_APP_SERVER_SOCKET_URL) {
+  connect() {
     if (this.socket?.connected) {
       console.warn("Socket is already connected");
       return;
     }
 
-    this.socket = io(serverUrl, {
+    this.socket = io(this.serverUrl, {
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: 1000
+      reconnectionDelay: 1000,
+      forceNew: true,
+      transports: ["websocket"]
     });
 
     this.setupEventListeners();
@@ -33,9 +36,7 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log(
-        `✅ Connected to socket server at ${process.env.REACT_APP_SERVER_SOCKET_URL}`
-      );
+      console.log(`✅ Connected to socket server at ${this.serverUrl}`);
       this.reconnectAttempts = 0;
     });
 
