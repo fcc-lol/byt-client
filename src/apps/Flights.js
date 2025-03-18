@@ -132,33 +132,27 @@ const FlightArrivals = () => {
     <Columns>
       <FlightsCard>
         <Description>ARRIVALS</Description>
-        {arrivals.slice(0, 5).map((flight) => {
-          console.log("Arrival flight:", flight);
-          return (
-            <FlightDataTable key={flight.fa_flight_id}>
-              <FlightDataRow>
-                <FlightNumber>{flight.ident}</FlightNumber>
-                <City>{flight.origin?.city || "?????????"}</City>
-                <Time>{formatRelativeTime(flight.actual_on)}</Time>
-              </FlightDataRow>
-            </FlightDataTable>
-          );
-        })}
+        {arrivals.slice(0, 5).map((flight) => (
+          <FlightDataTable key={flight.fa_flight_id}>
+            <FlightDataRow>
+              <FlightNumber>{flight.ident}</FlightNumber>
+              <City>{flight.origin?.city || "?????????"}</City>
+              <Time>{formatRelativeTime(flight.actual_on)}</Time>
+            </FlightDataRow>
+          </FlightDataTable>
+        ))}
       </FlightsCard>
       <FlightsCard>
         <Description>DEPARTURES</Description>
-        {departures.slice(0, 5).map((flight) => {
-          console.log("Departure flight:", flight);
-          return (
-            <FlightDataTable key={flight.fa_flight_id}>
-              <FlightDataRow>
-                <FlightNumber>{flight.ident}</FlightNumber>
-                <City>{flight.destination?.city || "?????????"}</City>
-                <Time>{formatRelativeTime(flight.actual_off)}</Time>
-              </FlightDataRow>
-            </FlightDataTable>
-          );
-        })}
+        {departures.slice(0, 5).map((flight) => (
+          <FlightDataTable key={flight.fa_flight_id}>
+            <FlightDataRow>
+              <FlightNumber>{flight.ident}</FlightNumber>
+              <City>{flight.destination?.city || "?????????"}</City>
+              <Time>{formatRelativeTime(flight.actual_off)}</Time>
+            </FlightDataRow>
+          </FlightDataTable>
+        ))}
       </FlightsCard>
     </Columns>
   );
