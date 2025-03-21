@@ -104,12 +104,14 @@ const FlightArrivals = () => {
       setDepartures(departuresData.departures || []);
       if (isInitialLoad) {
         setIsInitialLoad(false);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error fetching flight data:", error);
       setError("Error fetching flight data");
-    } finally {
-      setIsLoading(false);
+      if (isInitialLoad) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -120,7 +122,7 @@ const FlightArrivals = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (isLoading) {
+  if (isLoading && isInitialLoad) {
     return <LoadingCard message="JFK Flights" />;
   }
 
