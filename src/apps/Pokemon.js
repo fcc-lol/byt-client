@@ -51,6 +51,10 @@ const TopRow = styled.div`
   padding: 0 2rem;
 `;
 
+const StyledDataKey = styled(DataKey)`
+  width: 12rem;
+`;
+
 const Types = styled.div`
   display: flex;
   align-items: center;
@@ -156,19 +160,19 @@ const Pokemon = () => {
           </TopRow>
           <DataTable>
             <DataRow>
-              <DataKey>Number</DataKey>
+              <StyledDataKey>Number</StyledDataKey>
               <DataValue>{pokemon.id}</DataValue>
             </DataRow>
             <DataRow>
-              <DataKey>Height</DataKey>
+              <StyledDataKey>Height</StyledDataKey>
               <DataValue>{pokemon.height / 10}m</DataValue>
             </DataRow>
             <DataRow>
-              <DataKey>Weight</DataKey>
+              <StyledDataKey>Weight</StyledDataKey>
               <DataValue>{pokemon.weight / 10}kg</DataValue>
             </DataRow>
             <DataRow>
-              <DataKey>Moves</DataKey>
+              <StyledDataKey>Abilities</StyledDataKey>
               <DataValue>
                 {pokemon.abilities
                   .map((ability) => ability.ability.name)
