@@ -41,6 +41,7 @@ const InfoContainer = styled(Card)`
   justify-content: space-between;
   align-items: flex-start;
   gap: 0;
+  padding: 2rem 3rem;
 `;
 
 const TopRow = styled.div`
@@ -48,7 +49,10 @@ const TopRow = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 2rem;
+`;
+
+const Info = styled(DataTable)`
+  padding: 0;
 `;
 
 const StyledDataKey = styled(DataKey)`
@@ -93,6 +97,10 @@ const TypeBadge = styled.span`
   text-transform: uppercase;
   font-size: 2rem;
   font-weight: 600;
+`;
+
+const Name = styled(Label)`
+  line-height: 1;
 `;
 
 const Pokemon = () => {
@@ -149,7 +157,7 @@ const Pokemon = () => {
         </ImageContainer>
         <InfoContainer>
           <TopRow>
-            <Label>{pokemon.name}</Label>
+            <Name>{pokemon.name}</Name>
             <Types>
               {pokemon.types.map((type) => (
                 <TypeBadge key={type.type.name} type={type.type.name}>
@@ -158,7 +166,7 @@ const Pokemon = () => {
               ))}
             </Types>
           </TopRow>
-          <DataTable>
+          <Info>
             <DataRow>
               <StyledDataKey>Number</StyledDataKey>
               <DataValue>{pokemon.id}</DataValue>
@@ -179,7 +187,7 @@ const Pokemon = () => {
                   .join(", ")}
               </DataValue>
             </DataRow>
-          </DataTable>
+          </Info>
         </InfoContainer>
       </Columns>
     )
