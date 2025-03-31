@@ -16,12 +16,12 @@ import Icon from "../components/Icon";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import Value from "../components/Value";
 import LoadingCard from "../components/LoadingCard";
+import Description from "../components/Description";
 
 const BigIcon = styled(Icon)`
-  font-size: 8rem;
-  margin: 1rem 0;
+  font-size: 7rem;
+  margin: 1rem 0 1.5rem 0;
   color: rgba(255, 255, 255, 1);
 
   ${(props) =>
@@ -29,6 +29,37 @@ const BigIcon = styled(Icon)`
     `
     opacity: 0.25;
   `}
+`;
+
+const ForecastColumns = styled(Columns)`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  width: 100%;
+`;
+
+const ForecastCard = styled(Card)`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  gap: 0;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const DayLabel = styled(Label)`
+  margin-top: 0.5rem;
+`;
+
+const WeatherDescription = styled(Description)`
+  color: rgba(255, 255, 255, 1);
+  margin-bottom: 1rem;
+`;
+
+const WeatherTemperature = styled(Description)`
+  margin-top: 0;
+  margin-bottom: 0.5rem;
 `;
 
 const getWeatherIcon = (weatherIcon) => {
@@ -58,18 +89,23 @@ const getWeatherIcon = (weatherIcon) => {
   return faCloud;
 };
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { weekday: "short" });
+};
+
 export const Weather = () => {
-  const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchWeather = async () => {
     try {
-      const API_KEY = "V1aeZf9wiFjFjuixOJLM8GoZbvUzqpep";
+      const API_KEY = "V1aeZf9wiFjFjuixOJLM8GoZbvUzqpep"; // AccuWeather API key (free tier)
       const LOCATION_KEY = "349727"; // Long Island City
 
       const response = await fetch(
-        `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}`
+        `http://dataservice.accuweather.com/forecasts/v1/daily/5day/${LOCATION_KEY}?apikey=${API_KEY}`
       );
 
       if (!response.ok) {
@@ -77,8 +113,8 @@ export const Weather = () => {
         throw new Error(errorData.Message || "Weather data not available");
       }
 
-      const [data] = await response.json();
-      setWeather(data);
+      const data = await response.json();
+      setForecast(data);
     } catch (err) {
       console.error("Weather error:", err);
       setError(err.message);
@@ -93,7 +129,7 @@ export const Weather = () => {
   });
 
   if (loading) {
-    return <LoadingCard message="Current Weather" />;
+    return <LoadingCard message="Weather Forecast" />;
   }
 
   if (error) {
@@ -107,19 +143,19 @@ export const Weather = () => {
   }
 
   return (
-    weather && (
-      <Columns>
-        <Card>
-          <Value>NYC</Value>
-        </Card>
-        <Card>
-          <BigIcon icon={getWeatherIcon(weather.WeatherIcon)} />
-          <Label>{weather.WeatherText}</Label>
-        </Card>
-        <Card>
-          <Value>{Math.round(weather.Temperature.Imperial.Value)}°F</Value>
-        </Card>
-      </Columns>
+    forecast && (
+      <ForecastColumns>
+        {forecast.DailyForecasts.map((day, index) => (
+          <ForecastCard key={index}>
+            <DayLabel>{formatDate(day.Date)}</DayLabel>
+            <BigIcon icon={getWeatherIcon(day.Day.Icon)} />
+            <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
+            <WeatherTemperature>
+              {Math.round(day.Temperature.Maximum.Value)}°
+            </WeatherTemperature>
+          </ForecastCard>
+        ))}
+      </ForecastColumns>
     )
   );
 };
