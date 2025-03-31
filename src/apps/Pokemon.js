@@ -1,12 +1,12 @@
 import styled from "styled-components";
 import { useState, useCallback } from "react";
+import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import LoadingCard from "../components/LoadingCard";
-import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
 import {
   DataTable,
   DataRow,
@@ -137,18 +137,8 @@ const Pokemon = () => {
     setIsLoading(false);
   }, []);
 
-  const handleError = useCallback((error) => {
-    console.error("Failed to refresh Pokemon:", error);
-  }, []);
-
-  const handleSuccess = useCallback((result) => {
-    console.log("Pokemon refreshed successfully");
-  }, []);
-
   useAutoRefresh({
-    onRefresh: fetchRandomPokemon,
-    onError: handleError,
-    onSuccess: handleSuccess
+    onRefresh: fetchRandomPokemon
   });
 
   if (isLoading) {

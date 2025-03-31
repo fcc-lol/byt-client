@@ -36,7 +36,7 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log(`✅ Connected to socket server at ${this.serverUrl}`);
+      console.log(`📡 Connected to socket server at ${this.serverUrl}`);
       this.reconnectAttempts = 0;
     });
 

@@ -2,9 +2,16 @@ import { useEffect, useRef } from "react";
 
 export const useAutoRefresh = ({
   onRefresh,
-  intervalSeconds = 5,
-  onError = (error) => console.error("Refresh failed:", error),
-  onSuccess = (result) => console.log("Refresh successful:", result),
+  intervalSeconds = 60,
+  onError = (error) => console.error("Auto refresh failed:", error),
+  onSuccess = (result, isImmediate) =>
+    console.log(
+      `${
+        isImmediate
+          ? "💿 Initial data load successful"
+          : "♻️ Auto data refresh successful (every " + intervalSeconds + "s)"
+      }`
+    ),
   immediate = true
 }) => {
   const timeoutRef = useRef(null);
@@ -12,8 +19,8 @@ export const useAutoRefresh = ({
   const onRefreshRef = useRef(onRefresh);
   const onErrorRef = useRef(onError);
   const onSuccessRef = useRef(onSuccess);
+  const isImmediateRef = useRef(false);
 
-  // Update refs when callbacks change
   useEffect(() => {
     onRefreshRef.current = onRefresh;
     onErrorRef.current = onError;
@@ -27,27 +34,27 @@ export const useAutoRefresh = ({
 
       try {
         const result = await onRefreshRef.current();
-        onSuccessRef.current(result);
+        onSuccessRef.current(result, isImmediateRef.current);
       } catch (error) {
         onErrorRef.current(error);
       } finally {
         isRunningRef.current = false;
+        isImmediateRef.current = false;
         timeoutRef.current = setTimeout(execute, intervalSeconds * 1000);
       }
     };
 
-    // Start the periodic refresh
     if (immediate) {
+      isImmediateRef.current = true;
       execute();
     } else {
       timeoutRef.current = setTimeout(execute, intervalSeconds * 1000);
     }
 
-    // Cleanup function
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [intervalSeconds, immediate]); // Only re-run if interval or immediate flag changes
+  }, [intervalSeconds, immediate]);
 };
