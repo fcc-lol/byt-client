@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import LoadingCard from "../components/LoadingCard";
 import Rows from "../components/Rows";
 import Description from "../components/Description";
 
@@ -104,6 +105,8 @@ const IconName = styled(Description)`
 
 const RandomIcons = () => {
   const [icons, setIcons] = useState([]);
+  const [isError, setIsError] = useState(false);
+
   const { isLoading, fetchData: fetchRandomIcon } = useFetchRandomWithRetry({
     range: { min: 0, max: 68 },
     fetch: async (randomId) => {
@@ -111,7 +114,8 @@ const RandomIcons = () => {
         url: `https://raw.githubusercontent.com/leomancini/imac-g4/master/resources/images/icons/${randomId}.png`,
         name: ICON_NAMES[randomId]
       };
-    }
+    },
+    onError: () => setIsError(true)
   });
 
   const fetchFiveRandomIcons = async () => {
@@ -131,6 +135,10 @@ const RandomIcons = () => {
 
   if (isLoading) {
     return <LoadingCard message="Random Icons" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Icons" />;
   }
 
   return (

@@ -2,9 +2,10 @@ import styled from "styled-components";
 import { useState, useEffect, useRef } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import LoadingCard from "../components/LoadingCard";
 
 const QuoteContainer = styled.div`
   margin-bottom: 1rem;
@@ -82,6 +83,7 @@ const LiteraryClock = () => {
   });
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const currentMinuteRef = useRef(time.getMinutes());
   const containerRef = useRef(null);
 
@@ -331,6 +333,7 @@ const LiteraryClock = () => {
       setQuote(randomQuote);
     } catch (error) {
       console.error("Error fetching quote:", error);
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -357,6 +360,10 @@ const LiteraryClock = () => {
 
   if (isLoading) {
     return <LoadingCard message="Literary Clock" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Literary Clock" />;
   }
 
   return (

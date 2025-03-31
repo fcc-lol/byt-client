@@ -2,10 +2,11 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Card from "../components/Card";
 import Columns from "../components/Columns";
 import Description from "../components/Description";
-import LoadingCard from "../components/LoadingCard";
 import {
   DataTable,
   DataRow,
@@ -58,7 +59,7 @@ const FlightArrivals = () => {
   const [departures, setDepartures] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [error, setError] = useState(null);
+  const [isError, setIsError] = useState(false);
   const [, setTime] = useState(Date.now());
 
   useEffect(() => {
@@ -71,7 +72,6 @@ const FlightArrivals = () => {
     if (isInitialLoad) {
       setIsLoading(true);
     }
-    setError(null);
 
     const fccApiKey = new URLSearchParams(window.location.search).get(
       "fccApiKey"
@@ -109,7 +109,7 @@ const FlightArrivals = () => {
       }
     } catch (error) {
       console.error("Error fetching flight data:", error);
-      setError("Error fetching flight data");
+      setIsError(true);
       if (isInitialLoad) {
         setIsLoading(false);
       }
@@ -125,12 +125,8 @@ const FlightArrivals = () => {
     return <LoadingCard message="JFK Flights" />;
   }
 
-  if (error) {
-    return (
-      <Card>
-        <Description>{error}</Description>
-      </Card>
-    );
+  if (isError) {
+    return <ErrorCard message="JFK Flights" />;
   }
 
   return (

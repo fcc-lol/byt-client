@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Rows from "../components/Rows";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import LoadingCard from "../components/LoadingCard";
 
 const ColorPalette = () => {
   const [, setRandomColor] = useState(null);
   const [colorScheme, setColorScheme] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const generateRandomColor = async () => {
     setIsLoading(true);
@@ -28,6 +30,7 @@ const ColorPalette = () => {
       const data = await response.json();
       setColorScheme(data.colors);
     } catch (error) {
+      setIsError(true);
       console.error("Error fetching color scheme:", error);
     } finally {
       setIsLoading(false);
@@ -40,6 +43,10 @@ const ColorPalette = () => {
 
   if (isLoading) {
     return <LoadingCard message="Random Color Palette" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Color Palette" />;
   }
 
   return (

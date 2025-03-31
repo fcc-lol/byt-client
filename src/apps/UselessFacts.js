@@ -2,8 +2,9 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
-import Card from "../components/Card";
 import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
+import Card from "../components/Card";
 import Label from "../components/Label";
 
 const CenteredLabel = styled(Label)`
@@ -23,9 +24,9 @@ const CenteredLabel = styled(Label)`
 const UselessFacts = () => {
   const [fact, setFact] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isError, setIsError] = useState(false);
   const fetchRandomFact = async () => {
-    if (isLoading) return; // Prevent multiple simultaneous requests
+    if (isLoading) return;
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -38,6 +39,7 @@ const UselessFacts = () => {
       setFact(data);
     } catch (error) {
       console.error("Failed to fetch a random fact:", error);
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -49,6 +51,10 @@ const UselessFacts = () => {
 
   if (isLoading || !fact) {
     return <LoadingCard message="random fact" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="random fact" />;
   }
 
   return (

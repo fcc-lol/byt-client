@@ -4,11 +4,12 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Rows from "../components/Rows";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Description from "../components/Description";
-import LoadingCard from "../components/LoadingCard";
 
 const Sign = styled(Card)`
   flex-direction: row;
@@ -103,6 +104,7 @@ const routeColors = {
 const SubwayArrivals = () => {
   const [arrivals, setArrivals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [rotatingIndex, setRotatingIndex] = useState(0);
   const [shouldRotate, setShouldRotate] = useState(false);
   const [rotationTime, setRotationTime] = useState(3000);
@@ -137,6 +139,7 @@ const SubwayArrivals = () => {
       setArrivals(arrivalData);
     } catch (err) {
       console.error("Error fetching subway arrivals:", err);
+      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -187,6 +190,10 @@ const SubwayArrivals = () => {
 
   if (isLoading) {
     return <LoadingCard message="Next Subway Arrivals" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Next Subway Arrivals" />;
   }
 
   return (

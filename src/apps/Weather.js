@@ -8,28 +8,16 @@ import {
   faCloudRain,
   faSnowflake,
   faSmog,
-  faCloudBolt,
-  faExclamationTriangle
+  faCloudBolt
 } from "@fortawesome/free-solid-svg-icons";
 
-import Icon from "../components/Icon";
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import LoadingCard from "../components/LoadingCard";
 import Description from "../components/Description";
-
-const BigIcon = styled(Icon)`
-  font-size: 7rem;
-  margin: 1rem 0 1.5rem 0;
-  color: rgba(255, 255, 255, 1);
-
-  ${(props) =>
-    props.disabled &&
-    `
-    opacity: 0.25;
-  `}
-`;
+import BigIcon from "../components/BigIcon";
 
 const ForecastColumns = styled(Columns)`
   display: grid;
@@ -97,7 +85,7 @@ const formatDate = (dateString) => {
 export const Weather = () => {
   const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isError, setIsError] = useState(false);
 
   const fetchWeather = async () => {
     try {
@@ -117,7 +105,7 @@ export const Weather = () => {
       setForecast(data);
     } catch (err) {
       console.error("Weather error:", err);
-      setError(err.message);
+      setIsError(true);
     } finally {
       setLoading(false);
     }
@@ -132,14 +120,8 @@ export const Weather = () => {
     return <LoadingCard message="Weather Forecast" />;
   }
 
-  if (error) {
-    return (
-      <Columns>
-        <Card>
-          <BigIcon icon={faExclamationTriangle} disabled />
-        </Card>
-      </Columns>
-    );
+  if (isError) {
+    return <ErrorCard message="Weather Forecast" />;
   }
 
   return (

@@ -2,9 +2,10 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import LoadingCard from "../components/LoadingCard";
 
 const CenteredLabel = styled(Label)`
   font-weight: 400;
@@ -23,6 +24,7 @@ const CenteredLabel = styled(Label)`
 const CatFacts = () => {
   const [fact, setFact] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   const fetchNewFact = async (retryCount = 0) => {
     const MAX_RETRIES = 10;
@@ -49,7 +51,7 @@ const CatFacts = () => {
       }
     } catch (error) {
       console.error("Error fetching cat fact:", error);
-      setFact("Unable to fetch cat fact right now. Please try again later.");
+      setIsError(true);
       setIsLoading(false);
     }
   };
@@ -60,6 +62,10 @@ const CatFacts = () => {
 
   if (isLoading) {
     return <LoadingCard message="Random Cat Fact" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Cat Fact" />;
   }
 
   return (

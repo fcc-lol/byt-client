@@ -1,11 +1,13 @@
 import styled from "styled-components";
+import { useState } from "react";
 import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import LoadingCard from "../components/LoadingCard";
 import {
   DataTable,
   DataRow,
@@ -105,6 +107,8 @@ const Name = styled(Label)`
 `;
 
 const Pokemon = () => {
+  const [isError, setIsError] = useState(false);
+
   const {
     data: pokemon,
     isLoading,
@@ -116,7 +120,8 @@ const Pokemon = () => {
         `https://pokeapi.co/api/v2/pokemon/${randomId}`
       );
       return response.json();
-    }
+    },
+    onError: () => setIsError(true)
   });
 
   useAutoRefresh({
@@ -125,6 +130,10 @@ const Pokemon = () => {
 
   if (isLoading) {
     return <LoadingCard message="Random Pokemon" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Pokemon" />;
   }
 
   return (

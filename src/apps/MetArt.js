@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
-import LoadingCard from "../components/LoadingCard";
 import {
   DataTable,
   DataRow,
@@ -45,6 +46,8 @@ const MetArt = () => {
   const [objectIDs, setObjectIDs] = useState(null);
   const [isLoadingObjects, setIsLoadingObjects] = useState(true);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);
+  const [isError, setIsError] = useState(false);
+
   const { isLoading: isFetching, fetchData: fetchRandomArtwork } =
     useFetchRandomWithRetry({
       range: { min: 0, max: objectIDs ? objectIDs.length - 1 : 0 },
@@ -55,7 +58,8 @@ const MetArt = () => {
         );
         return response.json();
       },
-      validate: (data) => !!data?.primaryImageSmall
+      validate: (data) => !!data?.primaryImageSmall,
+      onError: () => setIsError(true)
     });
 
   useEffect(() => {
@@ -94,9 +98,10 @@ const MetArt = () => {
               setHasInitialFetch(true);
             }
           })
-          .catch((error) =>
-            console.error("Error fetching specific artwork:", error)
-          );
+          .catch((error) => {
+            console.error("Error fetching specific artwork:", error);
+            setIsError(true);
+          });
         return;
       }
 
@@ -116,6 +121,10 @@ const MetArt = () => {
 
   if (isLoadingObjects || isFetching) {
     return <LoadingCard message="Random Met Art" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Met Art" />;
   }
 
   return (

@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 
+import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
 import Card from "../components/Card";
 import Description from "../components/Description";
-import LoadingCard from "../components/LoadingCard";
 import Columns from "../components/Columns";
 import Label from "../components/Label";
 import Value from "../components/Value";
@@ -50,13 +51,12 @@ const Birthdays = () => {
   const [birthdays, setBirthdays] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [error, setError] = useState(null);
+  const [isError, setIsError] = useState(false);
 
   const fetchBirthdays = async () => {
     if (isInitialLoad) {
       setIsLoading(true);
     }
-    setError(null);
 
     const fccApiKey = new URLSearchParams(window.location.search).get(
       "fccApiKey"
@@ -80,7 +80,7 @@ const Birthdays = () => {
       }
     } catch (error) {
       console.error("Error fetching birthday data:", error);
-      setError("Error fetching birthday data");
+      setIsError(true);
       if (isInitialLoad) {
         setIsLoading(false);
       }
@@ -96,12 +96,8 @@ const Birthdays = () => {
     return <LoadingCard message="Upcoming Birthdays" />;
   }
 
-  if (error) {
-    return (
-      <Card>
-        <Description>{error}</Description>
-      </Card>
-    );
+  if (isError) {
+    return <ErrorCard message="Upcoming Birthdays" />;
   }
 
   return (

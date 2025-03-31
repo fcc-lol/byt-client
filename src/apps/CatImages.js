@@ -2,8 +2,9 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
-import Card from "../components/Card";
 import LoadingCard from "../components/LoadingCard";
+import ErrorCard from "../components/ErrorCard";
+import Card from "../components/Card";
 
 const CatImage = styled.img`
   width: 100%;
@@ -14,6 +15,7 @@ const CatImage = styled.img`
 const CatImages = () => {
   const [catImage, setCatImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const fetchCatImage = async () => {
     setIsLoading(true);
@@ -24,6 +26,7 @@ const CatImages = () => {
       const data = await response.json();
       setCatImage(data[0]);
     } catch (error) {
+      setIsError(true);
       console.error("Error fetching cat image:", error);
     } finally {
       setIsLoading(false);
@@ -36,6 +39,10 @@ const CatImages = () => {
 
   if (isLoading) {
     return <LoadingCard message="Random Cat Image" />;
+  }
+
+  if (isError) {
+    return <ErrorCard message="Random Cat Image" />;
   }
 
   return (
