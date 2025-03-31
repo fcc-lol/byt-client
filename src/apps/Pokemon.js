@@ -1,6 +1,5 @@
 import styled from "styled-components";
-import { useState, useCallback } from "react";
-import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
+import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
@@ -106,36 +105,19 @@ const Name = styled(Label)`
 `;
 
 const Pokemon = () => {
-  const [pokemon, setPokemon] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchRandomPokemon = useCallback(async () => {
-    setIsLoading(true);
-
-    const result = await fetchRandomWithRetry({
-      range: { min: 1, max: 1302 },
-      fetch: async (randomId) => {
-        const response = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${randomId}`
-        );
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-      },
-      validate: (data) => !!data,
-      failed: (attempt, error) => {
-        console.error(`Error fetching Pokemon (attempt ${attempt}):`, error);
-      }
-    });
-
-    if (result.success) {
-      setPokemon(result.data);
-    } else {
-      console.error(result.error);
+  const {
+    data: pokemon,
+    isLoading,
+    fetchData: fetchRandomPokemon
+  } = useFetchRandomWithRetry({
+    range: { min: 1, max: 1302 },
+    fetch: async (randomId) => {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${randomId}`
+      );
+      return response.json();
     }
-
-    setIsLoading(false);
-  }, []);
+  });
 
   useAutoRefresh({
     onRefresh: fetchRandomPokemon

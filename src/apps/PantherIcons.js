@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
+import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
@@ -104,47 +104,25 @@ const IconName = styled(Description)`
 
 const RandomIcons = () => {
   const [icons, setIcons] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchRandomIcon = async () => {
-    const result = await fetchRandomWithRetry({
-      range: { min: 0, max: 68 },
-      fetch: async (randomId) => {
-        return {
-          url: `https://raw.githubusercontent.com/leomancini/imac-g4/master/resources/images/icons/${randomId}.png`,
-          name: ICON_NAMES[randomId]
-        };
-      },
-      validate: (data) => !!data,
-      failed: (attempt, error) => {
-        console.error(`Error fetching icon (attempt ${attempt}):`, error);
-      }
-    });
-    return result;
-  };
+  const { isLoading, fetchData: fetchRandomIcon } = useFetchRandomWithRetry({
+    range: { min: 0, max: 68 },
+    fetch: async (randomId) => {
+      return {
+        url: `https://raw.githubusercontent.com/leomancini/imac-g4/master/resources/images/icons/${randomId}.png`,
+        name: ICON_NAMES[randomId]
+      };
+    }
+  });
 
   const fetchFiveRandomIcons = async () => {
-    setIsLoading(true);
     const newIcons = [];
-    const usedNumbers = new Set();
-
-    while (newIcons.length < 5) {
+    for (let i = 0; i < 5; i++) {
       const result = await fetchRandomIcon();
       if (result.success) {
-        // Extract the number from the URL
-        const match = result.data.url.match(/icons\/(\d+)\.png/);
-        const iconNumber = match ? match[1] : null;
-
-        // Only add if it's a new number we haven't used yet
-        if (iconNumber && !usedNumbers.has(iconNumber)) {
-          usedNumbers.add(iconNumber);
-          newIcons.push(result.data);
-        }
+        newIcons.push(result.data);
       }
     }
-
     setIcons(newIcons);
-    setIsLoading(false);
   };
 
   useAutoRefresh({

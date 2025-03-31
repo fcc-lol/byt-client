@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
-import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
+import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
@@ -42,16 +42,19 @@ const InfoContainer = styled(Card)`
 
 const MetArt = () => {
   const [artwork, setArtwork] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [objectIDs, setObjectIDs] = useState(null);
-
-  const fetchArtwork = async (objectId) => {
-    const response = await fetch(
-      `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
-    );
-    const artworkData = await response.json();
-    return artworkData;
-  };
+  const { isLoading: isFetching, fetchData: fetchRandomArtwork } =
+    useFetchRandomWithRetry({
+      range: { min: 0, max: objectIDs ? objectIDs.length - 1 : 0 },
+      fetch: async (randomIndex) => {
+        const objectId = objectIDs[randomIndex];
+        const response = await fetch(
+          `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
+        );
+        return response.json();
+      },
+      validate: (data) => !!data?.primaryImageSmall
+    });
 
   useEffect(() => {
     const fetchObjectsList = async () => {
@@ -63,7 +66,6 @@ const MetArt = () => {
         setObjectIDs(data.objectIDs);
       } catch (error) {
         console.error("Error fetching objects list:", error);
-        setLoading(false);
       }
     };
 
@@ -72,64 +74,40 @@ const MetArt = () => {
 
   useEffect(() => {
     if (objectIDs) {
-      fetchRandomArtwork();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [objectIDs]);
-
-  const fetchRandomArtwork = async () => {
-    setLoading(true);
-    setArtwork(null);
-
-    try {
       // Check for specific object ID in URL
       const urlParams = new URLSearchParams(window.location.search);
       const specificObjectId = urlParams.get("objectId");
 
       if (specificObjectId) {
-        const artworkData = await fetchArtwork(specificObjectId);
-        if (artworkData?.primaryImageSmall) {
-          setArtwork(artworkData);
-        }
-        setLoading(false);
+        fetch(
+          `https://collectionapi.metmuseum.org/public/collection/v1/objects/${specificObjectId}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data?.primaryImageSmall) {
+              setArtwork(data);
+            }
+          })
+          .catch((error) =>
+            console.error("Error fetching specific artwork:", error)
+          );
         return;
       }
 
       // Handle random artwork fetching
-      if (!objectIDs) {
-        setLoading(false);
-        return;
-      }
-
-      const result = await fetchRandomWithRetry({
-        range: { min: 0, max: objectIDs.length - 1 },
-        fetch: async (randomIndex) => {
-          const objectId = objectIDs[randomIndex];
-          return fetchArtwork(objectId);
-        },
-        validate: (data) => !!data?.primaryImageSmall,
-        failed: (attempt, error) => {
-          console.error(`Error fetching artwork (attempt ${attempt}):`, error);
+      fetchRandomArtwork().then((result) => {
+        if (result.success) {
+          setArtwork(result.data);
         }
       });
-
-      if (result.success) {
-        setArtwork(result.data);
-      } else {
-        console.error(result.error);
-      }
-    } catch (error) {
-      console.error("Error in fetchRandomArtwork:", error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [objectIDs, fetchRandomArtwork]);
 
   useAutoRefresh({
     onRefresh: fetchRandomArtwork
   });
 
-  if (loading) {
+  if (isFetching) {
     return <LoadingCard message="Random Met Art" />;
   }
 
