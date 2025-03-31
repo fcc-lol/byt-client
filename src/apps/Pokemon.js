@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import styled from "styled-components";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -11,6 +11,7 @@ import {
   DataKey,
   DataValue
 } from "../components/DataTable";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const ImageContainer = styled.div`
   max-width: 60%;
@@ -107,7 +108,7 @@ const Pokemon = () => {
   const [pokemon, setPokemon] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchRandomPokemon = async () => {
+  const fetchRandomPokemon = useCallback(async () => {
     setIsLoading(true);
 
     const result = await fetchRandomWithRetry({
@@ -133,11 +134,21 @@ const Pokemon = () => {
     }
 
     setIsLoading(false);
-  };
-
-  useEffect(() => {
-    fetchRandomPokemon();
   }, []);
+
+  const handleError = useCallback((error) => {
+    console.error("Failed to refresh Pokemon:", error);
+  }, []);
+
+  const handleSuccess = useCallback((result) => {
+    console.log("Pokemon refreshed successfully");
+  }, []);
+
+  useAutoRefresh({
+    onRefresh: fetchRandomPokemon,
+    onError: handleError,
+    onSuccess: handleSuccess
+  });
 
   if (isLoading) {
     return <LoadingCard message="Random Pokemon" />;
