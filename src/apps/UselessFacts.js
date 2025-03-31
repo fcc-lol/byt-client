@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Card from "../components/Card";
 import LoadingCard from "../components/LoadingCard";
@@ -42,10 +43,9 @@ const UselessFacts = () => {
     }
   };
 
-  useEffect(() => {
-    fetchRandomFact();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useAutoRefresh({
+    onRefresh: fetchRandomFact
+  });
 
   if (isLoading || !fact) {
     return <LoadingCard message="random fact" />;

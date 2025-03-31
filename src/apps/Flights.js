@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Card from "../components/Card";
 import Columns from "../components/Columns";
@@ -115,12 +116,10 @@ const FlightArrivals = () => {
     }
   };
 
-  useEffect(() => {
-    fetchFlights();
-    const interval = setInterval(fetchFlights, 60000); // Refresh every minute
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useAutoRefresh({
+    onRefresh: fetchFlights,
+    intervalSeconds: 60
+  });
 
   if (isLoading && isInitialLoad) {
     return <LoadingCard message="JFK Flights" />;

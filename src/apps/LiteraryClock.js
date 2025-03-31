@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useState, useEffect, useRef } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -83,9 +84,6 @@ const LiteraryClock = () => {
   const [isLoading, setIsLoading] = useState(false);
   const currentMinuteRef = useRef(time.getMinutes());
   const containerRef = useRef(null);
-  const isTimeOverridden = useRef(
-    !!new URLSearchParams(window.location.search).get("time")
-  );
 
   const hasEndingEllipsis = (text) => text.trim().endsWith("...");
   const hasStartingEllipsis = (text) => text.trim().startsWith("...");
@@ -338,24 +336,18 @@ const LiteraryClock = () => {
     }
   };
 
-  useEffect(() => {
-    // Only set up the timer if time is not overridden
-    if (!isTimeOverridden.current) {
-      const timer = setInterval(() => {
-        const newTime = new Date();
-        const newMinute = newTime.getMinutes();
-
-        if (newMinute !== currentMinuteRef.current) {
-          currentMinuteRef.current = newMinute;
-          setTime(newTime);
-          fetchQuote(newTime.getHours(), newTime.getMinutes());
-        }
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useAutoRefresh({
+    onRefresh: () => {
+      const newTime = new Date();
+      const newMinute = newTime.getMinutes();
+      if (newMinute !== currentMinuteRef.current) {
+        currentMinuteRef.current = newMinute;
+        setTime(newTime);
+        fetchQuote(newTime.getHours(), newTime.getMinutes());
+      }
+    },
+    intervalSeconds: 60
+  });
 
   // Initial fetch
   useEffect(() => {

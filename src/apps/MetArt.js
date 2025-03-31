@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useState, useEffect } from "react";
 import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -123,6 +124,10 @@ const MetArt = () => {
       setLoading(false);
     }
   };
+
+  useAutoRefresh({
+    onRefresh: fetchRandomArtwork
+  });
 
   if (loading) {
     return <LoadingCard message="Random Met Art" />;

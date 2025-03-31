@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -15,13 +16,10 @@ const Time = styled.div`
 const Clock = () => {
   const [time, setTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  useAutoRefresh({
+    onRefresh: () => setTime(new Date()),
+    intervalSeconds: 1
+  });
 
   return (
     <Columns>

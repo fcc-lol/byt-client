@@ -1,5 +1,7 @@
-import React, { useState, useCallback } from "react";
 import styled from "styled-components";
+import { useState, useCallback } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
+
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
@@ -11,7 +13,6 @@ import {
   DataKey,
   DataValue
 } from "../components/DataTable";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const ImageContainer = styled.div`
   max-width: 60%;

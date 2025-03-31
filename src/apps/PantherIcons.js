@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-
+import { useState } from "react";
 import { fetchRandomWithRetry } from "../utils/fetchRandomWithRetry";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Columns from "../components/Columns";
 import Card from "../components/Card";
@@ -147,10 +147,9 @@ const RandomIcons = () => {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchFiveRandomIcons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useAutoRefresh({
+    onRefresh: fetchFiveRandomIcons
+  });
 
   if (isLoading) {
     return <LoadingCard message="Random Icons" />;

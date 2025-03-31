@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
+
 import {
   faSun,
   faCloud,
@@ -16,6 +18,7 @@ import Card from "../components/Card";
 import Label from "../components/Label";
 import Value from "../components/Value";
 import LoadingCard from "../components/LoadingCard";
+
 const BigIcon = styled(Icon)`
   font-size: 8rem;
   margin: 1rem 0;
@@ -60,33 +63,34 @@ export const Weather = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const API_KEY = "V1aeZf9wiFjFjuixOJLM8GoZbvUzqpep";
-        const LOCATION_KEY = "349727"; // Long Island City
+  const fetchWeather = async () => {
+    try {
+      const API_KEY = "V1aeZf9wiFjFjuixOJLM8GoZbvUzqpep";
+      const LOCATION_KEY = "349727"; // Long Island City
 
-        const response = await fetch(
-          `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}`
-        );
+      const response = await fetch(
+        `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}`
+      );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.Message || "Weather data not available");
-        }
-
-        const [data] = await response.json();
-        setWeather(data);
-      } catch (err) {
-        console.error("Weather error:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.Message || "Weather data not available");
       }
-    };
 
-    fetchWeather();
-  }, []);
+      const [data] = await response.json();
+      setWeather(data);
+    } catch (err) {
+      console.error("Weather error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useAutoRefresh({
+    onRefresh: fetchWeather,
+    intervalSeconds: 300
+  });
 
   if (loading) {
     return <LoadingCard message="Current Weather" />;

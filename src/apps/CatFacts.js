@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Card from "../components/Card";
 import Label from "../components/Label";
@@ -53,10 +54,9 @@ const CatFacts = () => {
     }
   };
 
-  useEffect(() => {
-    fetchNewFact();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useAutoRefresh({
+    onRefresh: fetchNewFact
+  });
 
   if (isLoading) {
     return <LoadingCard message="Random Cat Fact" />;

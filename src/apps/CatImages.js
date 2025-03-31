@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Card from "../components/Card";
 import LoadingCard from "../components/LoadingCard";
@@ -29,9 +30,9 @@ const CatImages = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCatImage();
-  }, []);
+  useAutoRefresh({
+    onRefresh: fetchCatImage
+  });
 
   if (isLoading) {
     return <LoadingCard message="Random Cat Image" />;

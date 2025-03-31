@@ -1,12 +1,15 @@
 // Configure at https://subway-sign.danzaharia.com/sign/leom
 
-import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useState, useEffect } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
+
 import Rows from "../components/Rows";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Description from "../components/Description";
 import LoadingCard from "../components/LoadingCard";
+
 const Sign = styled(Card)`
   flex-direction: row;
   width: 100%;
@@ -104,49 +107,44 @@ const SubwayArrivals = () => {
   const [shouldRotate, setShouldRotate] = useState(false);
   const [rotationTime, setRotationTime] = useState(3000);
 
-  useEffect(() => {
-    const fetchArrivals = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          "https://subway-arrivals.herokuapp.com/sign/leom"
-        );
+  const fetchArrivals = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        "https://subway-arrivals.herokuapp.com/sign/leom"
+      );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Get configuration from first item
-        const config = data[0] || {};
-        setShouldRotate(!!config.rotating);
-        // Set rotation time if provided, otherwise keep default
-        if (config.rotationTime) {
-          setRotationTime(config.rotationTime * 1000); // Convert seconds to milliseconds
-        }
-
-        // Filter out the first item which contains configuration
-        const arrivalData = data.filter((item, index) => index > 0);
-
-        // Sort arrivals by minutes until arrival
-        arrivalData.sort((a, b) => a.minutesUntil - b.minutesUntil);
-
-        setArrivals(arrivalData);
-      } catch (err) {
-        console.error("Error fetching subway arrivals:", err);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    };
 
-    fetchArrivals();
+      const data = await response.json();
 
-    // Set up polling every minute
-    const intervalId = setInterval(fetchArrivals, 60000);
+      // Get configuration from first item
+      const config = data[0] || {};
+      setShouldRotate(!!config.rotating);
+      // Set rotation time if provided, otherwise keep default
+      if (config.rotationTime) {
+        setRotationTime(config.rotationTime * 1000); // Convert seconds to milliseconds
+      }
 
-    return () => clearInterval(intervalId);
-  }, []);
+      // Filter out the first item which contains configuration
+      const arrivalData = data.filter((item, index) => index > 0);
+
+      // Sort arrivals by minutes until arrival
+      arrivalData.sort((a, b) => a.minutesUntil - b.minutesUntil);
+
+      setArrivals(arrivalData);
+    } catch (err) {
+      console.error("Error fetching subway arrivals:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useAutoRefresh({
+    onRefresh: fetchArrivals
+  });
 
   // Rotate through the remaining arrivals using the configured rotation time
   useEffect(() => {

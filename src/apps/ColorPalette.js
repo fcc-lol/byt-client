@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import Rows from "../components/Rows";
 import Columns from "../components/Columns";
@@ -33,9 +34,9 @@ const ColorPalette = () => {
     }
   };
 
-  useEffect(() => {
-    generateRandomColor();
-  }, []);
+  useAutoRefresh({
+    onRefresh: generateRandomColor
+  });
 
   if (isLoading) {
     return <LoadingCard message="Random Color Palette" />;
