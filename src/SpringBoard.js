@@ -104,6 +104,7 @@ const Simulator = styled.div`
   top: 50%;
   display: flex;
   flex-direction: column;
+  border-radius: 5rem;
 `;
 
 function SpringBoard() {
