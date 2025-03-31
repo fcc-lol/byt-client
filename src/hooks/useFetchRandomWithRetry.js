@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export const getRandomInRange = ({ min, max }) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
@@ -14,35 +14,34 @@ export const useFetchRandomWithRetry = ({
   autoRetry = false,
   retryInterval = 5000
 }) => {
-  const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [attempts, setAttempts] = useState(0);
+  const hasValidData = useRef(false);
+  const currentAttemptsRef = useRef(0);
+  const dataRef = useRef(null);
 
   const fetchData = useCallback(async () => {
+    hasValidData.current = false;
     setIsLoading(true);
     setError(null);
-    setAttempts(0);
+    currentAttemptsRef.current = 0;
 
-    let currentAttempts = 0;
-
-    while (currentAttempts < maxAttempts) {
+    while (currentAttemptsRef.current < maxAttempts) {
       try {
         const result = await fetch(getRandom());
 
         if (validate(result)) {
-          setData(result);
+          hasValidData.current = true;
+          dataRef.current = result;
           setIsLoading(false);
           return { success: true, data: result };
         }
 
-        currentAttempts++;
-        setAttempts(currentAttempts);
-        failed(currentAttempts, new Error("Validation failed"));
+        currentAttemptsRef.current++;
+        failed(currentAttemptsRef.current, new Error("Validation failed"));
       } catch (error) {
-        currentAttempts++;
-        setAttempts(currentAttempts);
-        failed(currentAttempts, error);
+        currentAttemptsRef.current++;
+        failed(currentAttemptsRef.current, error);
       }
     }
 
@@ -55,7 +54,7 @@ export const useFetchRandomWithRetry = ({
 
   // Auto-retry logic
   useEffect(() => {
-    if (!autoRetry) return;
+    if (!autoRetry || hasValidData.current) return;
 
     const interval = setInterval(() => {
       if (!isLoading) {
@@ -67,10 +66,10 @@ export const useFetchRandomWithRetry = ({
   }, [autoRetry, retryInterval, isLoading, fetchData]);
 
   return {
-    data,
+    data: hasValidData.current ? dataRef.current : null,
     isLoading,
     error,
-    attempts,
+    attempts: currentAttemptsRef.current,
     fetchData
   };
 };

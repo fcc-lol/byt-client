@@ -1,7 +1,6 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFetchRandomWithRetry } from "../hooks/useFetchRandomWithRetry";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
@@ -47,11 +46,13 @@ const MetArt = () => {
   const [isLoadingObjects, setIsLoadingObjects] = useState(true);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);
   const [isError, setIsError] = useState(false);
+  const hasSetArtworkRef = useRef(false);
 
   const { isLoading: isFetching, fetchData: fetchRandomArtwork } =
     useFetchRandomWithRetry({
       range: { min: 0, max: objectIDs ? objectIDs.length - 1 : 0 },
       fetch: async (randomIndex) => {
+        if (!objectIDs) throw new Error("Object IDs not loaded yet");
         const objectId = objectIDs[randomIndex];
         const response = await fetch(
           `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
@@ -59,7 +60,8 @@ const MetArt = () => {
         return response.json();
       },
       validate: (data) => !!data?.primaryImageSmall,
-      onError: () => setIsError(true)
+      onError: () => setIsError(true),
+      maxAttempts: 10
     });
 
   useEffect(() => {
@@ -93,8 +95,9 @@ const MetArt = () => {
         )
           .then((response) => response.json())
           .then((data) => {
-            if (data?.primaryImageSmall) {
+            if (data?.primaryImageSmall && !hasSetArtworkRef.current) {
               setArtwork(data);
+              hasSetArtworkRef.current = true;
               setHasInitialFetch(true);
             }
           })
@@ -107,17 +110,24 @@ const MetArt = () => {
 
       // Handle random artwork fetching
       fetchRandomArtwork().then((result) => {
-        if (result.success) {
+        if (result.success && !hasSetArtworkRef.current) {
           setArtwork(result.data);
+          hasSetArtworkRef.current = true;
           setHasInitialFetch(true);
         }
       });
     }
   }, [objectIDs, hasInitialFetch, fetchRandomArtwork]);
 
-  useAutoRefresh({
-    onRefresh: fetchRandomArtwork
-  });
+  const handleClick = () => {
+    hasSetArtworkRef.current = false;
+    fetchRandomArtwork().then((result) => {
+      if (result.success) {
+        setArtwork(result.data);
+        hasSetArtworkRef.current = true;
+      }
+    });
+  };
 
   if (isLoadingObjects || isFetching) {
     return <LoadingCard message="Random Met Art" />;
@@ -129,7 +139,7 @@ const MetArt = () => {
 
   return (
     artwork && (
-      <Columns onClick={fetchRandomArtwork}>
+      <Columns onClick={handleClick}>
         <ImageContainer>
           <ArtImage src={artwork.primaryImageSmall} alt={artwork.title} />
         </ImageContainer>
