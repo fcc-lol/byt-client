@@ -105,7 +105,7 @@ export const Weather = () => {
       const LOCATION_KEY = "349727"; // Long Island City
 
       const response = await fetch(
-        `http://dataservice.accuweather.com/forecasts/v1/daily/5day/${LOCATION_KEY}?apikey=${API_KEY}`
+        `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${LOCATION_KEY}?apikey=${API_KEY}`
       );
 
       if (!response.ok) {
