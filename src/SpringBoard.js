@@ -135,8 +135,12 @@ function SpringBoard() {
         });
       }
 
-      // Sort apps alphabetically by name
-      loadedApps.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort apps alphabetically by name, but keep Clock first
+      loadedApps.sort((a, b) => {
+        if (a.name === "Clock") return -1;
+        if (b.name === "Clock") return 1;
+        return a.name.localeCompare(b.name);
+      });
       setApps(loadedApps);
 
       // Check for app parameter in URL
