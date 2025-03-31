@@ -43,6 +43,8 @@ const InfoContainer = styled(Card)`
 const MetArt = () => {
   const [artwork, setArtwork] = useState(null);
   const [objectIDs, setObjectIDs] = useState(null);
+  const [isLoadingObjects, setIsLoadingObjects] = useState(true);
+  const [hasInitialFetch, setHasInitialFetch] = useState(false);
   const { isLoading: isFetching, fetchData: fetchRandomArtwork } =
     useFetchRandomWithRetry({
       range: { min: 0, max: objectIDs ? objectIDs.length - 1 : 0 },
@@ -59,6 +61,7 @@ const MetArt = () => {
   useEffect(() => {
     const fetchObjectsList = async () => {
       try {
+        setIsLoadingObjects(true);
         const response = await fetch(
           "https://collectionapi.metmuseum.org/public/collection/v1/objects"
         );
@@ -66,6 +69,8 @@ const MetArt = () => {
         setObjectIDs(data.objectIDs);
       } catch (error) {
         console.error("Error fetching objects list:", error);
+      } finally {
+        setIsLoadingObjects(false);
       }
     };
 
@@ -73,7 +78,7 @@ const MetArt = () => {
   }, []);
 
   useEffect(() => {
-    if (objectIDs) {
+    if (objectIDs && !hasInitialFetch) {
       // Check for specific object ID in URL
       const urlParams = new URLSearchParams(window.location.search);
       const specificObjectId = urlParams.get("objectId");
@@ -86,6 +91,7 @@ const MetArt = () => {
           .then((data) => {
             if (data?.primaryImageSmall) {
               setArtwork(data);
+              setHasInitialFetch(true);
             }
           })
           .catch((error) =>
@@ -98,16 +104,17 @@ const MetArt = () => {
       fetchRandomArtwork().then((result) => {
         if (result.success) {
           setArtwork(result.data);
+          setHasInitialFetch(true);
         }
       });
     }
-  }, [objectIDs, fetchRandomArtwork]);
+  }, [objectIDs, hasInitialFetch, fetchRandomArtwork]);
 
   useAutoRefresh({
     onRefresh: fetchRandomArtwork
   });
 
-  if (isFetching) {
+  if (isLoadingObjects || isFetching) {
     return <LoadingCard message="Random Met Art" />;
   }
 
