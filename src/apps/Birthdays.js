@@ -102,7 +102,7 @@ const Birthdays = () => {
 
   return (
     <Columns>
-      {birthdays.map((person) => (
+      {birthdays.slice(0, 4).map((person) => (
         <BirthdayCard key={person.name}>
           <Label>{formatDate(person.date, "month")}</Label>
           <Day>{formatDate(person.date, "day")}</Day>
