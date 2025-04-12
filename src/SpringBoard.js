@@ -8,6 +8,7 @@ import {
 import Icon from "./components/Icon";
 import NotificationCenter from "./components/NotificationCenter";
 import LoadingCard from "./components/LoadingCard";
+import ErrorCard from "./components/ErrorCard";
 
 const Body = styled.div`
   width: 100%;
@@ -112,10 +113,12 @@ function SpringBoard() {
   const [isDevice, setIsDevice] = useState(false);
   const [apps, setApps] = useState([]);
   const [scale, setScale] = useState(1);
+  const [fccApiKey, setFccApiKey] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setIsDevice(params.get("onDevice") === "true");
+    setFccApiKey(params.get("fccApiKey"));
   }, []);
 
   useEffect(() => {
@@ -190,13 +193,26 @@ function SpringBoard() {
     return <LoadingCard message="Loading apps" />;
   }
 
+  // Check if current app requires API key
+  const currentAppName = apps[currentApp].name.toLowerCase();
+  const requiresApiKey = ["flights", "lego minifigs", "birthdays"].includes(
+    currentAppName
+  );
+  const showApiKeyError = requiresApiKey && !fccApiKey;
+
   const content = (
     <>
       <NotificationCenter />
       <AppSwitcherButton onClick={handlePrevious} $isDevice={isDevice}>
         <Icon icon={faChevronLeft} />
       </AppSwitcherButton>
-      <AppContent>{apps[currentApp].component}</AppContent>
+      <AppContent>
+        {showApiKeyError ? (
+          <ErrorCard type="api-key" />
+        ) : (
+          apps[currentApp].component
+        )}
+      </AppContent>
       <AppSwitcherButton onClick={handleNext} $isDevice={isDevice}>
         <Icon icon={faChevronRight} />
       </AppSwitcherButton>

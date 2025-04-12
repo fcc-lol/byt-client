@@ -19,8 +19,13 @@ const ImageContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
   border-radius: ${(props) => props.theme.borderRadius.large};
+  transition: background-color 0.3s ease-in-out;
+
+  &.done-loading {
+    background-color: rgba(255, 255, 255, 1);
+  }
 `;
 
 const ArtImage = styled.img`
@@ -30,6 +35,12 @@ const ArtImage = styled.img`
   border-radius: ${(props) => props.theme.borderRadius.large};
   background-color: rgba(255, 255, 255, 1);
   padding: 2rem;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+
+  &.done-loading {
+    opacity: 1;
+  }
 `;
 
 const InfoContainer = styled(Card)`
@@ -46,6 +57,7 @@ const MetArt = () => {
   const [isLoadingObjects, setIsLoadingObjects] = useState(true);
   const [hasInitialFetch, setHasInitialFetch] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const hasSetArtworkRef = useRef(false);
 
   const { isLoading: isFetching, fetchData: fetchRandomArtwork } =
@@ -121,6 +133,7 @@ const MetArt = () => {
 
   const handleClick = () => {
     hasSetArtworkRef.current = false;
+    setIsImageLoaded(false);
     fetchRandomArtwork().then((result) => {
       if (result.success) {
         setArtwork(result.data);
@@ -140,8 +153,13 @@ const MetArt = () => {
   return (
     artwork && (
       <Columns onClick={handleClick}>
-        <ImageContainer>
-          <ArtImage src={artwork.primaryImageSmall} alt={artwork.title} />
+        <ImageContainer className={isImageLoaded ? "done-loading" : ""}>
+          <ArtImage
+            src={artwork.primaryImageSmall}
+            alt={artwork.title}
+            className={isImageLoaded ? "done-loading" : ""}
+            onLoad={() => setIsImageLoaded(true)}
+          />
         </ImageContainer>
         <InfoContainer>
           <DataTable>

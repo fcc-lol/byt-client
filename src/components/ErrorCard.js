@@ -13,10 +13,14 @@ const ErrorCardContainer = styled(Card)`
   background-color: rgba(255, 255, 255, 0.05);
 `;
 
-const ErrorCard = ({ message }) => (
+const ErrorCard = ({ message, type }) => (
   <ErrorCardContainer>
     <BigIcon icon={faExclamationTriangle} disabled />
-    <Description>Error loading{message ? ` ${message}` : ""}</Description>
+    {type === "api-key" ? (
+      <Description>No API key provided</Description>
+    ) : (
+      <Description>Error loading{message ? ` ${message}` : ""}</Description>
+    )}
   </ErrorCardContainer>
 );
 

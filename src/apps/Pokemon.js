@@ -21,9 +21,14 @@ const ImageContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
   border-radius: ${(props) => props.theme.borderRadius.large};
   min-width: 30rem;
+  transition: background-color 0.3s ease-in-out;
+
+  &.done-loading {
+    background-color: rgba(255, 255, 255, 1);
+  }
 `;
 
 const PokemonImage = styled.img`
@@ -33,6 +38,12 @@ const PokemonImage = styled.img`
   border-radius: ${(props) => props.theme.borderRadius.large};
   background-color: rgba(255, 255, 255, 1);
   padding: 2rem;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+
+  &.done-loading {
+    opacity: 1;
+  }
 `;
 
 const InfoContainer = styled(Card)`
@@ -108,6 +119,7 @@ const Name = styled(Label)`
 
 const Pokemon = () => {
   const [isError, setIsError] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const {
     data: pokemon,
@@ -116,6 +128,7 @@ const Pokemon = () => {
   } = useFetchRandomWithRetry({
     range: { min: 1, max: 1302 },
     fetch: async (randomId) => {
+      setIsImageLoaded(false);
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${randomId}`
       );
@@ -139,13 +152,15 @@ const Pokemon = () => {
   return (
     pokemon && (
       <Columns onClick={fetchRandomPokemon}>
-        <ImageContainer style={{ backgroundColor: "white" }}>
+        <ImageContainer className={isImageLoaded ? "done-loading" : ""}>
           <PokemonImage
             src={
               pokemon.sprites.other?.["official-artwork"]?.front_default ||
               pokemon.sprites.front_default
             }
             alt={pokemon.name}
+            className={isImageLoaded ? "done-loading" : ""}
+            onLoad={() => setIsImageLoaded(true)}
           />
         </ImageContainer>
         <InfoContainer>
