@@ -120,9 +120,12 @@ const RandomIcons = () => {
 
   const fetchFiveRandomIcons = async () => {
     const newIcons = [];
-    for (let i = 0; i < 5; i++) {
+    const usedIds = new Set();
+
+    while (newIcons.length < 5) {
       const result = await fetchRandomIcon();
-      if (result.success) {
+      if (result.success && !usedIds.has(result.data.url)) {
+        usedIds.add(result.data.url);
         newIcons.push(result.data);
       }
     }
