@@ -37,12 +37,21 @@ const ForecastCard = styled(Card)`
 `;
 
 const DayLabel = styled(Label)`
-  margin-top: 0.5rem;
+  margin: 0;
+`;
+
+const WeatherIcon = styled(BigIcon)`
+  font-size: 7rem;
 `;
 
 const WeatherDescription = styled(Description)`
   color: rgba(255, 255, 255, 1);
-  margin-bottom: 1rem;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const WeatherTemperature = styled(Description)`
@@ -130,7 +139,7 @@ export const Weather = () => {
         {forecast.DailyForecasts.map((day, index) => (
           <ForecastCard key={index}>
             <DayLabel>{formatDate(day.Date)}</DayLabel>
-            <BigIcon icon={getWeatherIcon(day.Day.Icon)} />
+            <WeatherIcon icon={getWeatherIcon(day.Day.Icon)} />
             <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
             <WeatherTemperature>
               {Math.round(day.Temperature.Maximum.Value)}°
