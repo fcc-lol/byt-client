@@ -78,9 +78,12 @@ const LegoMinifigs = () => {
   const fetchFiveRandomMinifigs = async () => {
     setLoadedImages({});
     const newMinifigs = [];
+    const usedIds = new Set();
+
     while (newMinifigs.length < 5) {
       const result = await fetchRandomMinifig();
-      if (result.success) {
+      if (result.success && !usedIds.has(result.data.set_num)) {
+        usedIds.add(result.data.set_num);
         newMinifigs.push(result.data);
       }
     }
