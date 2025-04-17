@@ -140,7 +140,7 @@ const Percentage = styled(Value)`
   `}
 
   ${(props) =>
-    props.percentage < 20 &&
+    props.percentage <= 20 &&
     `
       font-size: 2rem;
   `}
