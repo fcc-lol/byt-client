@@ -131,6 +131,7 @@ const ProgressBar = styled.div`
 const Percentage = styled(Value)`
   font-size: 4.5rem;
   color: rgba(255, 255, 255, 1);
+  transition: opacity 0.3s ease-in-out;
 
   ${(props) =>
     props.majority &&
