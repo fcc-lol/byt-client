@@ -168,11 +168,17 @@ function SpringBoard() {
 
   useEffect(() => {
     const calculateScale = () => {
-      // Calculate scale but cap it at 1.0 to prevent scaling above original size
-      const scale = Math.min(
-        1.0, // Maximum scale
-        Math.min(window.innerWidth / 1920, window.innerHeight / 480) * 0.9
-      );
+      // Calculate the maximum possible scale that would fit the window
+      const maxScale =
+        Math.min(window.innerWidth / 1920, window.innerHeight / 480) * 0.9;
+
+      // Calculate the actual dimensions at this scale
+      const width = Math.floor(1920 * maxScale);
+      const height = Math.floor(480 * maxScale);
+
+      // Calculate the scale that would give us these integer dimensions
+      const scale = Math.min(1.0, Math.min(width / 1920, height / 480));
+
       setScale(scale);
     };
 
