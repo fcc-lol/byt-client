@@ -16,7 +16,7 @@ import {
 } from "../components/DataTable";
 
 const ImageContainer = styled.div`
-  max-width: 60%;
+  max-width: 60vw;
   height: 100%;
   display: flex;
   align-items: center;
