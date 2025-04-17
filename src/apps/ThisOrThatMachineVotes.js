@@ -83,8 +83,16 @@ const ProgressBar = styled.div`
   background-color: rgba(255, 255, 255, 0.05);
   transition: background-color 0.3s ease-in-out;
 
+  * {
+    opacity: 0;
+  }
+
   &.done-loading {
     background-color: rgba(255, 255, 255, 0.1);
+
+    * {
+      opacity: 1;
+    }
   }
 
   ${(props) =>
@@ -92,6 +100,10 @@ const ProgressBar = styled.div`
     `
       &.done-loading {
         background-color: rgba(255, 255, 255, 1);
+
+        * {
+          opacity: 1;
+        }
       }
   `}
 
@@ -190,11 +202,11 @@ const ThisOrThat = () => {
   };
 
   if (isLoading) {
-    return <LoadingCard message="This or That" />;
+    return <LoadingCard message="This or That Machine Votes" />;
   }
 
   if (isError) {
-    return <ErrorCard message="This or That" />;
+    return <ErrorCard message="This or That Machine Votes" />;
   }
 
   if (!pair) {
