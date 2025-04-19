@@ -185,6 +185,9 @@ const ThisOrThat = () => {
 
   const fetchNewPair = async () => {
     setLoadedImages({});
+    setPair(null);
+    setIsError(false);
+
     const result = await fetchRandomPair();
     if (result.success) {
       setPair(result.data);
