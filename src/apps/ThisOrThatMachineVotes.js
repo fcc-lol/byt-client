@@ -155,6 +155,19 @@ const ThisOrThat = () => {
     "fccApiKey"
   );
 
+  const validatePair = (data) => {
+    return (
+      data &&
+      data.options &&
+      Array.isArray(data.options) &&
+      data.options.length >= 2 &&
+      data.options[0] &&
+      data.options[1] &&
+      data.options[0].url &&
+      data.options[1].url
+    );
+  };
+
   const { isLoading, fetchData: fetchRandomPair } = useFetchRandomWithRetry({
     range: { min: 1, max: 1000 },
     fetch: async () => {
@@ -166,6 +179,7 @@ const ThisOrThat = () => {
         return data;
       }
     },
+    validate: validatePair,
     onError: () => setIsError(true)
   });
 
@@ -186,7 +200,8 @@ const ThisOrThat = () => {
   };
 
   const calculatePercentages = () => {
-    if (!pair || !pair.options) return { left: 50, right: 50 };
+    if (!pair || !pair.options || pair.options.length < 2)
+      return { left: 50, right: 50 };
     const totalVotes = pair.options.reduce(
       (sum, option) => sum + option.votes,
       0
@@ -219,12 +234,16 @@ const ThisOrThat = () => {
   return (
     <Container onClick={fetchNewPair}>
       <ImageContainer side="left" percentage={percentages.left}>
-        <Image
-          src={pair.options[0].url}
-          alt={pair.options[0].value}
-          className={loadedImages[0] ? "done-loading" : ""}
-          onLoad={() => handleImageLoad(0)}
-        />
+        {pair.options && pair.options[0] ? (
+          <Image
+            src={pair.options[0].url}
+            alt={pair.options[0].value}
+            className={loadedImages[0] ? "done-loading" : ""}
+            onLoad={() => handleImageLoad(0)}
+          />
+        ) : (
+          <div>No image available</div>
+        )}
       </ImageContainer>
       <ProgressBarContainer>
         <ProgressBar
@@ -267,12 +286,16 @@ const ThisOrThat = () => {
         </ProgressBar>
       </ProgressBarContainer>
       <ImageContainer side="right" percentage={percentages.right}>
-        <Image
-          src={pair.options[1].url}
-          alt={pair.options[1].value}
-          className={loadedImages[1] ? "done-loading" : ""}
-          onLoad={() => handleImageLoad(1)}
-        />
+        {pair.options && pair.options[1] ? (
+          <Image
+            src={pair.options[1].url}
+            alt={pair.options[1].value}
+            className={loadedImages[1] ? "done-loading" : ""}
+            onLoad={() => handleImageLoad(1)}
+          />
+        ) : (
+          <div>No image available</div>
+        )}
       </ImageContainer>
     </Container>
   );
