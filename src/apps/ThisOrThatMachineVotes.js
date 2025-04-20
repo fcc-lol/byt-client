@@ -96,7 +96,7 @@ const ProgressBar = styled.div`
   }
 
   ${(props) =>
-    props.majority &&
+    props.$majority &&
     `
       &.done-loading {
         background-color: rgba(255, 255, 255, 1);
@@ -134,7 +134,7 @@ const Percentage = styled(Value)`
   transition: opacity 0.3s ease-in-out;
 
   ${(props) =>
-    props.majority &&
+    props.$majority &&
     `
       color: rgba(0, 0, 0, 1);
   `}
@@ -252,7 +252,7 @@ const ThisOrThat = () => {
         <ProgressBar
           side="left"
           percentage={percentages.left}
-          majority={
+          $majority={
             percentages.left > percentages.right ||
             percentages.left === percentages.right
           }
@@ -260,7 +260,7 @@ const ThisOrThat = () => {
         >
           <Percentage
             percentage={percentages.left}
-            majority={
+            $majority={
               percentages.left > percentages.right ||
               percentages.left === percentages.right
             }
@@ -271,7 +271,7 @@ const ThisOrThat = () => {
         <ProgressBar
           side="right"
           percentage={percentages.right}
-          majority={
+          $majority={
             percentages.right > percentages.left ||
             percentages.right === percentages.left
           }
@@ -279,7 +279,7 @@ const ThisOrThat = () => {
         >
           <Percentage
             percentage={percentages.right}
-            majority={
+            $majority={
               percentages.right > percentages.left ||
               percentages.right === percentages.left
             }
