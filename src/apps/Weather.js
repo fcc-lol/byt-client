@@ -37,6 +37,10 @@ const ForecastCard = styled(Card)`
   justify-content: space-between;
 `;
 
+const DayLabel = styled(Label)`
+  margin: 0.5rem 0;
+`;
+
 const DescriptionContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -57,11 +61,12 @@ const IconContainer = styled.div`
 const WeatherDescription = styled(Description)`
   color: rgba(255, 255, 255, 1);
   text-align: center;
-  line-height: 1.25;
-  min-height: 2.5rem;
+  line-height: 2.5rem;
+  min-height: 5.5rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
 `;
 
 const WeatherTemperature = styled(Description)`
@@ -103,6 +108,21 @@ const getWeatherIcon = (weatherIcon) => {
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", { weekday: "short" });
+};
+
+// Helper function to format weather description
+const formatWeatherDescription = (description) => {
+  const words = description.split(" ");
+  if (words.length === 2) {
+    return (
+      <>
+        {words[0]}
+        <br />
+        {words[1]}
+      </>
+    );
+  }
+  return description;
 };
 
 export const Weather = () => {
@@ -160,15 +180,15 @@ export const Weather = () => {
 
           return (
             <ForecastCard key={index}>
-              <Label>{formatDate(day.Date)}</Label>
-
+              <DayLabel>{formatDate(day.Date)}</DayLabel>
               <DescriptionContainer>
                 <IconContainer>
                   <FontAwesomeIcon icon={dayIcon} />
                 </IconContainer>
-                <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
+                <WeatherDescription>
+                  {formatWeatherDescription(day.Day.IconPhrase)}
+                </WeatherDescription>
               </DescriptionContainer>
-
               <WeatherTemperature>
                 {Math.round(day.Temperature?.Maximum?.Value || 0)}°
               </WeatherTemperature>
