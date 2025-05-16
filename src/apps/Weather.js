@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
   faSun,
@@ -17,7 +18,6 @@ import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Description from "../components/Description";
-import BigIcon from "../components/BigIcon";
 
 const ForecastColumns = styled(Columns)`
   display: grid;
@@ -28,20 +28,30 @@ const ForecastColumns = styled(Columns)`
 
 const ForecastCard = styled(Card)`
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   min-width: 0;
-  gap: 0;
+  gap: 0.5rem;
   align-items: center;
   justify-content: space-between;
 `;
 
-const DayLabel = styled(Label)`
-  margin: 0;
+const DescriptionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 `;
 
-const WeatherIcon = styled(BigIcon)`
-  font-size: 7rem;
+const IconContainer = styled.div`
+  font-size: 5rem;
+  color: rgba(255, 255, 255, 1);
+  height: 5rem;
+  width: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const WeatherDescription = styled(Description)`
@@ -60,30 +70,34 @@ const WeatherTemperature = styled(Description)`
 `;
 
 const getWeatherIcon = (weatherIcon) => {
-  // AccuWeather icon mapping
-  // 1-5 Sunny/Mostly Sunny
-  // 6-11 Cloudy/Mostly Cloudy
-  // 12-14 Rain
-  // 15 Thunderstorms
-  // 16-17 Strong Thunderstorms
-  // 18 Rain and Thunder
-  // 19-29 Snow/Flurries
-  // 30-31 Hot
-  // 32 Windy
-  // 33-34 Moon/Clear (night)
-  // 35-38 Cloudy (night)
-  // 39-44 Rain/Storms (night)
+  // Add logging to debug null icons
+  if (weatherIcon === undefined || weatherIcon === null) {
+    console.warn("⚠️ Weather icon value is missing:", weatherIcon);
+    return faCloud; // Fallback to cloud icon
+  }
 
-  if (weatherIcon <= 5) return faSun;
-  if (weatherIcon <= 11) return faCloud;
-  if (weatherIcon <= 14) return faCloudRain;
-  if (weatherIcon <= 18) return faCloudBolt; // Thunder/Storm conditions
-  if (weatherIcon <= 29) return faSnowflake;
-  if (weatherIcon <= 32) return faSmog;
-  if (weatherIcon <= 34) return faSun; // Clear night
-  if (weatherIcon <= 38) return faCloud; // Cloudy night
-  if (weatherIcon <= 44) return faCloudBolt; // Storms at night
-  return faCloud;
+  // Convert to number if it's a string
+  const iconNum = Number(weatherIcon);
+
+  if (isNaN(iconNum)) {
+    console.warn("⚠️ Invalid weather icon value:", weatherIcon);
+    return faCloud;
+  }
+
+  let result;
+  // AccuWeather icon mapping
+  if (iconNum <= 5) result = faSun;
+  else if (iconNum <= 11) result = faCloud;
+  else if (iconNum <= 14) result = faCloudRain;
+  else if (iconNum <= 18) result = faCloudBolt; // Thunder/Storm conditions
+  else if (iconNum <= 29) result = faSnowflake;
+  else if (iconNum <= 32) result = faSmog;
+  else if (iconNum <= 34) result = faSun; // Clear night
+  else if (iconNum <= 38) result = faCloud; // Cloudy night
+  else if (iconNum <= 44) result = faCloudBolt; // Storms at night
+  else result = faCloud;
+
+  return result;
 };
 
 const formatDate = (dateString) => {
@@ -136,16 +150,31 @@ export const Weather = () => {
   return (
     forecast && (
       <ForecastColumns>
-        {forecast.DailyForecasts.map((day, index) => (
-          <ForecastCard key={index}>
-            <DayLabel>{formatDate(day.Date)}</DayLabel>
-            <WeatherIcon icon={getWeatherIcon(day.Day.Icon)} />
-            <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
-            <WeatherTemperature>
-              {Math.round(day.Temperature.Maximum.Value)}°
-            </WeatherTemperature>
-          </ForecastCard>
-        ))}
+        {forecast.DailyForecasts.map((day, index) => {
+          if (!day || !day.Day || !day.Night) {
+            console.warn("⚠️ Invalid day data:", day);
+            return null;
+          }
+
+          const dayIcon = getWeatherIcon(day.Day.Icon);
+
+          return (
+            <ForecastCard key={index}>
+              <Label>{formatDate(day.Date)}</Label>
+
+              <DescriptionContainer>
+                <IconContainer>
+                  <FontAwesomeIcon icon={dayIcon} />
+                </IconContainer>
+                <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
+              </DescriptionContainer>
+
+              <WeatherTemperature>
+                {Math.round(day.Temperature?.Maximum?.Value || 0)}°
+              </WeatherTemperature>
+            </ForecastCard>
+          );
+        })}
       </ForecastColumns>
     )
   );
