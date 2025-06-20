@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import BigIcon from "../components/BigIcon";
+import Icon from "../components/Icon";
 
 import {
   faSun,
@@ -17,7 +19,6 @@ import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
 import Description from "../components/Description";
-import BigIcon from "../components/BigIcon";
 
 const ForecastColumns = styled(Columns)`
   display: grid;
@@ -49,6 +50,7 @@ const WeatherDescription = styled(Description)`
   text-align: center;
   line-height: 1.25;
   min-height: 2.5rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,15 +76,24 @@ const getWeatherIcon = (weatherIcon) => {
   // 35-38 Cloudy (night)
   // 39-44 Rain/Storms (night)
 
-  if (weatherIcon <= 5) return faSun;
-  if (weatherIcon <= 11) return faCloud;
-  if (weatherIcon <= 14) return faCloudRain;
-  if (weatherIcon <= 18) return faCloudBolt; // Thunder/Storm conditions
-  if (weatherIcon <= 29) return faSnowflake;
-  if (weatherIcon <= 32) return faSmog;
-  if (weatherIcon <= 34) return faSun; // Clear night
-  if (weatherIcon <= 38) return faCloud; // Cloudy night
-  if (weatherIcon <= 44) return faCloudBolt; // Storms at night
+  // Ensure weatherIcon is a valid number
+  if (!weatherIcon || isNaN(weatherIcon)) {
+    return faCloud; // Default fallback
+  }
+
+  const iconNum = parseInt(weatherIcon, 10);
+
+  if (iconNum >= 1 && iconNum <= 5) return faSun;
+  if (iconNum >= 6 && iconNum <= 11) return faCloud;
+  if (iconNum >= 12 && iconNum <= 14) return faCloudRain;
+  if (iconNum >= 15 && iconNum <= 18) return faCloudBolt; // Thunder/Storm conditions
+  if (iconNum >= 19 && iconNum <= 29) return faSnowflake;
+  if (iconNum >= 30 && iconNum <= 32) return faSmog;
+  if (iconNum >= 33 && iconNum <= 34) return faSun; // Clear night
+  if (iconNum >= 35 && iconNum <= 38) return faCloud; // Cloudy night
+  if (iconNum >= 39 && iconNum <= 44) return faCloudBolt; // Storms at night
+
+  // Default fallback for any unhandled cases
   return faCloud;
 };
 
@@ -136,16 +147,20 @@ export const Weather = () => {
   return (
     forecast && (
       <ForecastColumns>
-        {forecast.DailyForecasts.map((day, index) => (
-          <ForecastCard key={index}>
-            <DayLabel>{formatDate(day.Date)}</DayLabel>
-            <WeatherIcon icon={getWeatherIcon(day.Day.Icon)} />
-            <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
-            <WeatherTemperature>
-              {Math.round(day.Temperature.Maximum.Value)}°
-            </WeatherTemperature>
-          </ForecastCard>
-        ))}
+        {forecast.DailyForecasts.map((day, index) => {
+          const weatherIcon = getWeatherIcon(day.Day.Icon) || faCloud;
+
+          return (
+            <ForecastCard key={index}>
+              <DayLabel>{formatDate(day.Date)}</DayLabel>
+              <WeatherIcon icon={weatherIcon} />
+              <WeatherDescription>{day.Day.IconPhrase}</WeatherDescription>
+              <WeatherTemperature>
+                {Math.round(day.Temperature.Maximum.Value)}°
+              </WeatherTemperature>
+            </ForecastCard>
+          );
+        })}
       </ForecastColumns>
     )
   );

@@ -2,7 +2,9 @@ import styled from "styled-components";
 
 import Icon from "./Icon";
 
-const BigIcon = styled(Icon)`
+const BigIcon = styled(Icon).withConfig({
+  shouldForwardProp: (prop) => prop !== "disabled"
+})`
   font-size: 7rem;
   margin: 1rem 0 1.5rem 0;
   color: rgba(255, 255, 255, 1);
