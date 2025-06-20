@@ -180,7 +180,8 @@ const ThisOrThat = () => {
       }
     },
     validate: validatePair,
-    onError: () => setIsError(true)
+    onError: () => setIsError(true),
+    maxAttempts: fccApiKey ? 10 : 0
   });
 
   const fetchNewPair = async () => {
@@ -197,6 +198,11 @@ const ThisOrThat = () => {
   useAutoRefresh({
     onRefresh: fetchNewPair
   });
+
+  // Check if API key is provided
+  if (!fccApiKey) {
+    return <ErrorCard type="api-key" />;
+  }
 
   const handleImageLoad = (index) => {
     setLoadedImages((prev) => ({ ...prev, [index]: true }));
