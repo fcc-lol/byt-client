@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import BigIcon from "../components/BigIcon";
-import Icon from "../components/Icon";
 
 import {
   faSun,
