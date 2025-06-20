@@ -1,0 +1,9 @@
+{
+  "short_name": "Byt Client",
+  "name": "Byt Client",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
+
