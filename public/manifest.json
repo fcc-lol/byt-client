@@ -1,6 +1,6 @@
 {
-  "short_name": "Byt Client",
-  "name": "Byt Client",
+  "short_name": "FCC Byt",
+  "name": "FCC Byt",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
