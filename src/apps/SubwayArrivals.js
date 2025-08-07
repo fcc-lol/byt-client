@@ -113,7 +113,7 @@ const SubwayArrivals = () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        "https://subway-arrivals.herokuapp.com/sign/leom"
+        "https://subway-sign-backend.danzaharia.com/sign/fccs"
       );
 
       if (!response.ok) {
