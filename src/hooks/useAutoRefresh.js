@@ -31,15 +31,20 @@ export const useAutoRefresh = ({
     const execute = async () => {
       if (isRunningRef.current) return;
       isRunningRef.current = true;
+      let hadError = false;
 
       try {
         const result = await onRefreshRef.current();
         onSuccessRef.current(result, isImmediateRef.current);
       } catch (error) {
+        hadError = true;
         onErrorRef.current(error);
       } finally {
         isRunningRef.current = false;
         isImmediateRef.current = false;
+        if (hadError) {
+          return;
+        }
         timeoutRef.current = setTimeout(execute, intervalSeconds * 1000);
       }
     };

@@ -90,7 +90,6 @@ const LiteraryClock = () => {
   const hasEndingEllipsis = (text) => text.trim().endsWith("...");
   const hasStartingEllipsis = (text) => text.trim().startsWith("...");
   const isJustPeriod = (text) => /^\s*\.\s*$/.test(text);
-  const isTimeNumeric = (text) => /\d/.test(text);
   const hasTrailingQuote = (text) => {
     const trimmed = text.trim();
     // First remove any existing ellipsis to check for quote
@@ -233,34 +232,20 @@ const LiteraryClock = () => {
     try {
       const paddedHours = hours.toString().padStart(2, "0");
       const paddedMinutes = minutes.toString().padStart(2, "0");
+      const fccApiKey = new URLSearchParams(window.location.search).get(
+        "fccApiKey"
+      );
       const response = await fetch(
-        `https://api.allorigins.win/get?url=${encodeURIComponent(
-          `https://literature-clock.jenevoldsen.com/times/${paddedHours}_${paddedMinutes}.json`
+        `${
+          process.env.REACT_APP_SERVER_API_URL
+        }/api/literary-clock/${paddedHours}/${paddedMinutes}?fccApiKey=${encodeURIComponent(
+          fccApiKey || ""
         )}`
       );
-      const { contents } = await response.json();
-      const quotes = JSON.parse(contents);
-      // First try to get SFW quotes
-      let sfwQuotes = quotes.filter((q) => q.sfw === "yes");
-
-      // If no SFW quotes are available, fall back to all quotes
-      if (sfwQuotes.length === 0) {
-        sfwQuotes = quotes;
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
       }
-
-      // Separate quotes into those with written-out times and numeric times
-      const writtenTimeQuotes = sfwQuotes.filter(
-        (q) => !isTimeNumeric(q.quote_time_case)
-      );
-      const numericTimeQuotes = sfwQuotes.filter((q) =>
-        isTimeNumeric(q.quote_time_case)
-      );
-
-      // Pick from written-out times if available, otherwise fall back to numeric times
-      const quotePool =
-        writtenTimeQuotes.length > 0 ? writtenTimeQuotes : numericTimeQuotes;
-      const randomQuote =
-        quotePool[Math.floor(Math.random() * quotePool.length)];
+      const randomQuote = await response.json();
 
       // Clean br tags and preserve spaces
       randomQuote.quote_first = (randomQuote.quote_first || "")
