@@ -1,4 +1,4 @@
-// Configure at https://subway-sign.danzaharia.com/sign/leom
+// Configure at https://subway-sign.danzaharia.com/sign/fccs
 
 import styled from "styled-components";
 import { useState, useEffect } from "react";
