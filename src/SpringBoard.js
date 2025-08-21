@@ -498,11 +498,7 @@ function SpringBoard() {
       <AppLockIndicator $active={isAppLocked}>
         <Icon icon={faLock} />
       </AppLockIndicator>
-      <AppSwitcherButton
-        onClick={handlePrevious}
-        $isDevice={isDevice}
-        disabled={isInteractionDisabled}
-      >
+      <AppSwitcherButton onClick={handlePrevious} $isDevice={isDevice}>
         <Icon icon={faChevronLeft} />
       </AppSwitcherButton>
       <AppContent
@@ -520,11 +516,7 @@ function SpringBoard() {
           apps[currentApp].component
         )}
       </AppContent>
-      <AppSwitcherButton
-        onClick={handleNext}
-        $isDevice={isDevice}
-        disabled={isInteractionDisabled}
-      >
+      <AppSwitcherButton onClick={handleNext} $isDevice={isDevice}>
         <Icon icon={faChevronRight} />
       </AppSwitcherButton>
     </>
