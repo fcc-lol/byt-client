@@ -188,6 +188,7 @@ function SpringBoard() {
   const [isScreensaverActive, setIsScreensaverActive] = useState(true);
   const [isAppLocked, setIsAppLocked] = useState(false);
   const [isInteractionDisabled, setIsInteractionDisabled] = useState(false);
+  const [isFirstTapOnDevice, setIsFirstTapOnDevice] = useState(false);
   const activityTimeoutRef = useRef(null);
   const longPressTimerRef = useRef(null);
   const interactionDisableTimeoutRef = useRef(null);
@@ -195,7 +196,9 @@ function SpringBoard() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setIsDevice(params.get("onDevice") === "true");
+    const deviceMode = params.get("onDevice") === "true";
+    setIsDevice(deviceMode);
+    setIsFirstTapOnDevice(deviceMode); // Set to true when on device to ignore first tap
     setFccApiKey(params.get("fccApiKey"));
   }, []);
 
@@ -278,6 +281,12 @@ function SpringBoard() {
         return;
       }
 
+      // Ignore first tap when on device mode
+      if (isFirstTapOnDevice) {
+        setIsFirstTapOnDevice(false); // Reset flag after first tap
+        return;
+      }
+
       // Clear existing timeout
       if (activityTimeoutRef.current) {
         clearTimeout(activityTimeoutRef.current);
@@ -323,7 +332,12 @@ function SpringBoard() {
         clearTimeout(activityTimeoutRef.current);
       }
     };
-  }, [isScreensaverActive, isAppLocked, isInteractionDisabled]);
+  }, [
+    isScreensaverActive,
+    isAppLocked,
+    isInteractionDisabled,
+    isFirstTapOnDevice
+  ]);
 
   // Cleanup timers on unmount
   useEffect(() => {
