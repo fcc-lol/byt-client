@@ -193,6 +193,7 @@ function SpringBoard() {
   const longPressTimerRef = useRef(null);
   const interactionDisableTimeoutRef = useRef(null);
   const screensaverCycleTimerRef = useRef(null);
+  const firstTapIgnoreTimeoutRef = useRef(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -283,7 +284,16 @@ function SpringBoard() {
 
       // Ignore first tap when on device mode
       if (isFirstTapOnDevice) {
-        setIsFirstTapOnDevice(false); // Reset flag after first tap
+        // Clear any existing timeout
+        if (firstTapIgnoreTimeoutRef.current) {
+          clearTimeout(firstTapIgnoreTimeoutRef.current);
+        }
+        
+        // Set timeout to reset flag after a short delay to ignore all events from same interaction
+        firstTapIgnoreTimeoutRef.current = setTimeout(() => {
+          setIsFirstTapOnDevice(false);
+        }, 100);
+        
         return;
       }
 
@@ -347,6 +357,9 @@ function SpringBoard() {
       }
       if (screensaverCycleTimerRef.current) {
         clearInterval(screensaverCycleTimerRef.current);
+      }
+      if (firstTapIgnoreTimeoutRef.current) {
+        clearTimeout(firstTapIgnoreTimeoutRef.current);
       }
     };
   }, []);
