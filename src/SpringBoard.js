@@ -288,12 +288,12 @@ function SpringBoard() {
         if (firstTapIgnoreTimeoutRef.current) {
           clearTimeout(firstTapIgnoreTimeoutRef.current);
         }
-        
+
         // Set timeout to reset flag after a short delay to ignore all events from same interaction
         firstTapIgnoreTimeoutRef.current = setTimeout(() => {
           setIsFirstTapOnDevice(false);
         }, 100);
-        
+
         return;
       }
 
@@ -511,9 +511,13 @@ function SpringBoard() {
 
   // Check if current app requires API key
   const currentAppName = apps[currentApp].name.toLowerCase();
-  const requiresApiKey = ["flights", "lego minifigs", "birthdays"].includes(
-    currentAppName
-  );
+  const requiresApiKey = [
+    "flights",
+    "lego minifigs",
+    "birthdays",
+    "literary clock",
+    "this or that machine votes"
+  ].includes(currentAppName);
   const showApiKeyError = requiresApiKey && !fccApiKey;
 
   const content = (

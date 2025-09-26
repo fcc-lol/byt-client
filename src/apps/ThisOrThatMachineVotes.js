@@ -151,10 +151,6 @@ const ThisOrThat = () => {
   const [isError, setIsError] = useState(false);
   const [loadedImages, setLoadedImages] = useState({});
 
-  const fccApiKey = new URLSearchParams(window.location.search).get(
-    "fccApiKey"
-  );
-
   const validatePair = (data) => {
     return (
       data &&
@@ -171,6 +167,9 @@ const ThisOrThat = () => {
   const { isLoading, fetchData: fetchRandomPair } = useFetchRandomWithRetry({
     range: { min: 1, max: 1000 },
     fetch: async () => {
+      const fccApiKey = new URLSearchParams(window.location.search).get(
+        "fccApiKey"
+      );
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_API_URL}/api/this-or-that/random-pair?fccApiKey=${fccApiKey}`
       );
@@ -181,7 +180,7 @@ const ThisOrThat = () => {
     },
     validate: validatePair,
     onError: () => setIsError(true),
-    maxAttempts: fccApiKey ? 10 : 0
+    maxAttempts: 10
   });
 
   const fetchNewPair = async () => {
@@ -198,11 +197,6 @@ const ThisOrThat = () => {
   useAutoRefresh({
     onRefresh: fetchNewPair
   });
-
-  // Check if API key is provided
-  if (!fccApiKey) {
-    return <ErrorCard type="api-key" />;
-  }
 
   const handleImageLoad = (index) => {
     setLoadedImages((prev) => ({ ...prev, [index]: true }));
