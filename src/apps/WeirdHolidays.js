@@ -12,13 +12,8 @@ const HolidayContainer = styled.div`
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 2rem;
   padding: 0 2rem;
-`;
-
-const HolidayEmoji = styled.div`
-  font-size: 6rem;
-  margin-bottom: 0.5rem;
 `;
 
 const HolidayName = styled(Label)`
@@ -35,6 +30,7 @@ const HolidayDescription = styled(Description)`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0 6rem;
 `;
 
 const WeirdHolidays = () => {
@@ -97,7 +93,6 @@ const WeirdHolidays = () => {
       }
     >
       <HolidayContainer>
-        <HolidayEmoji>{currentHoliday.emoji}</HolidayEmoji>
         <HolidayName>Today is {currentHoliday.name}</HolidayName>
         <HolidayDescription>{currentHoliday.description}</HolidayDescription>
       </HolidayContainer>

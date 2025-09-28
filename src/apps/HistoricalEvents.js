@@ -97,7 +97,7 @@ const HistoricalEvents = () => {
       }
     >
       <EventContainer>
-        <EventYear>{currentEvent.year}</EventYear>
+        <EventYear>Today in {currentEvent.year}</EventYear>
         <EventTitle>{currentEvent.title}</EventTitle>
         <EventDescription>{currentEvent.description}</EventDescription>
       </EventContainer>
