@@ -6,7 +6,7 @@ import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
-import Description from "../components/Description";
+import AppDescription from "../components/AppDescription";
 
 const NycSkyColors = () => {
   const [colors, setColors] = useState(null);
@@ -67,7 +67,7 @@ const NycSkyColors = () => {
           </Card>
         ))}
       </Columns>
-      <Description style={{ margin: "2.5rem 0 1.5rem 0 " }}>
+      <AppDescription>
         NYC Sky colors on{" "}
         {currentDate.toLocaleTimeString("en-US", {
           weekday: "long",
@@ -79,7 +79,7 @@ const NycSkyColors = () => {
           second: "2-digit",
           timeZone: "America/New_York"
         })}
-      </Description>
+      </AppDescription>
     </>
   );
 };

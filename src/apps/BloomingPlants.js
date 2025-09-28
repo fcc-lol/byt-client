@@ -5,6 +5,7 @@ import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import LoadingCard from "../components/LoadingCard";
 import ErrorCard from "../components/ErrorCard";
 import Card from "../components/Card";
+import AppDescription from "../components/AppDescription";
 import Description from "../components/Description";
 import Columns from "../components/Columns";
 import Label from "../components/Label";
@@ -17,22 +18,22 @@ const PlantColumns = styled(Columns)`
 `;
 
 const PlantCard = styled(Card)`
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  word-wrap: break-word !important;
-  position: relative !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-end !important;
-  min-height: 300px !important;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  word-wrap: break-word;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 300px;
 `;
 
 const PlantTextOverlay = styled.div`
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   padding: 1rem;
   color: white;
   text-align: center;
@@ -54,6 +55,7 @@ const PlantCardWithImage = styled(PlantCard)`
 const PlantLabel = styled(Label)`
   margin: 0;
   font-size: 3rem;
+  line-height: 1.25;
 `;
 
 const BloomingPlants = () => {
@@ -154,19 +156,26 @@ const BloomingPlants = () => {
 
   return (
     plantsData && (
-      <PlantColumns>
-        {plantsData.plants.map((plant, index) => (
-          <PlantCardWithImage
-            key={index}
-            $imageUrl={plantImages[plant.commonName]}
-          >
-            <PlantTextOverlay>
-              <PlantLabel>{plant.commonName}</PlantLabel>
-              <Description>{plant.location}</Description>
-            </PlantTextOverlay>
-          </PlantCardWithImage>
-        ))}
-      </PlantColumns>
+      <>
+        <PlantColumns>
+          {plantsData.plants.map((plant, index) => (
+            <PlantCardWithImage
+              key={index}
+              $imageUrl={plantImages[plant.commonName]}
+            >
+              <PlantTextOverlay>
+                <PlantLabel>{plant.commonName}</PlantLabel>
+                <Description style={{ margin: "0" }}>
+                  {plant.location}
+                </Description>
+              </PlantTextOverlay>
+            </PlantCardWithImage>
+          ))}
+        </PlantColumns>
+        <AppDescription>
+          Flowers currently in bloom around the world
+        </AppDescription>
+      </>
     )
   );
 };
