@@ -61,9 +61,7 @@ const NycSkyColors = () => {
       <Columns>
         {colorEntries.map(([direction, color]) => (
           <Card key={direction} style={{ backgroundColor: color }}>
-            <Label>
-              {direction.charAt(0).toUpperCase() + direction.slice(1)}
-            </Label>
+            <Label>{direction.split("-").join("\n")}</Label>
           </Card>
         ))}
       </Columns>
