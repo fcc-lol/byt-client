@@ -12,7 +12,7 @@ const NycSkyColors = () => {
   const [colors, setColors] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [metadata, setMetadata] = useState(null);
 
   const fetchSkyColors = async () => {
     setIsLoading(true);
@@ -24,6 +24,7 @@ const NycSkyColors = () => {
 
       if (data.colors) {
         setColors(data.colors);
+        setMetadata(data.metadata);
       } else {
         setIsError(true);
       }
@@ -38,7 +39,6 @@ const NycSkyColors = () => {
   useAutoRefresh({
     onRefresh: () => {
       fetchSkyColors();
-      setCurrentDate(new Date());
     }
   });
 
@@ -66,17 +66,9 @@ const NycSkyColors = () => {
         ))}
       </Columns>
       <AppDescription>
-        NYC Sky colors on{" "}
-        {currentDate.toLocaleTimeString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit",
-          timeZone: "America/New_York"
-        })}
+        {`NYC Sky colors on ${
+          metadata?.lastUpdated?.formatted || "Loading..."
+        }`}
       </AppDescription>
     </>
   );
