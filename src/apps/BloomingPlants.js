@@ -56,6 +56,20 @@ const PlantLabel = styled(Label)`
   margin: 0;
   font-size: 3rem;
   line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const PlantRegion = styled(Description)`
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const BloomingPlants = () => {
@@ -165,9 +179,9 @@ const BloomingPlants = () => {
             >
               <PlantTextOverlay>
                 <PlantLabel>{plant.commonName}</PlantLabel>
-                <Description style={{ margin: "0" }}>
+                <PlantRegion style={{ margin: "0" }}>
                   {plant.location}
-                </Description>
+                </PlantRegion>
               </PlantTextOverlay>
             </PlantCardWithImage>
           ))}
