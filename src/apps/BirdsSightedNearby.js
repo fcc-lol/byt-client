@@ -7,6 +7,7 @@ import ErrorCard from "../components/ErrorCard";
 import Columns from "../components/Columns";
 import Card from "../components/Card";
 import Label from "../components/Label";
+import Description from "../components/Description";
 import AppDescription from "../components/AppDescription";
 
 const BirdColumns = styled(Columns)`
@@ -51,7 +52,7 @@ const BirdCardWithImage = styled(BirdCard)`
     props.$imageUrl ? `url(${props.$imageUrl})` : "none"};
 `;
 
-const BirdCount = styled(Label)`
+const BirdCount = styled(Description)`
   margin: 0;
   font-size: 3rem;
   line-height: 1.25;
