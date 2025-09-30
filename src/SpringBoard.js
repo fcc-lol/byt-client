@@ -378,7 +378,8 @@ function SpringBoard() {
         const requiresApiKey = [
           "flights",
           "lego minifigs",
-          "birthdays"
+          "birthdays",
+          "birds sighted nearby"
         ].includes(appName);
 
         if (!requiresApiKey || fccApiKey) {
@@ -516,7 +517,8 @@ function SpringBoard() {
     "lego minifigs",
     "birthdays",
     "literary clock",
-    "this or that machine votes"
+    "this or that machine votes",
+    "birds sighted nearby"
   ].includes(currentAppName);
   const showApiKeyError = requiresApiKey && !fccApiKey;
 
