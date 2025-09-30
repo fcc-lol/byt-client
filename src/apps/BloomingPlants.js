@@ -13,7 +13,7 @@ import Label from "../components/Label";
 const PlantColumns = styled(Columns)`
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: 1rem !important;
+  gap: 2rem !important;
   flex-direction: unset !important;
 `;
 
