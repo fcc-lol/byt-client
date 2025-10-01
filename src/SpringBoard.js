@@ -204,47 +204,56 @@ function SpringBoard() {
   }, []);
 
   useEffect(() => {
-    // Dynamically import all files from apps directory
+    // Load apps from configuration file
     const importApps = async () => {
-      const context = require.context("./apps", false, /\.js$/);
-      const loadedApps = [];
+      try {
+        // Import the apps configuration
+        const appsConfig = await import("./apps.json");
+        const context = require.context("./apps", false, /\.js$/);
+        const loadedApps = [];
 
-      for (const key of context.keys()) {
-        const module = context(key);
-        const appName = key.replace("./", "").replace(".js", "");
-        // Get the component from either default or named export
-        const AppComponent = module.default || Object.values(module)[0];
+        // Load apps in the order specified in the configuration array
+        for (const appName of appsConfig.default) {
+          try {
+            // Import the specific app component
+            const module = context(`./${appName}.js`);
+            const AppComponent = module.default || Object.values(module)[0];
 
-        loadedApps.push({
-          name: appName.replace(/([A-Z])/g, " $1").trim(), // Add spaces before capital letters
-          component: <AppComponent />
-        });
-      }
+            // Convert filename to display name (add spaces before capital letters)
+            const displayName = appName.replace(/([A-Z])/g, " $1").trim();
 
-      // Sort apps alphabetically by name, but keep Clock first
-      loadedApps.sort((a, b) => {
-        if (a.name === "Clock") return -1;
-        if (b.name === "Clock") return 1;
-        return a.name.localeCompare(b.name);
-      });
-      setApps(loadedApps);
-
-      // Check for app parameter in URL
-      const params = new URLSearchParams(window.location.search);
-      const appParam = params.get("app");
-      if (appParam) {
-        // Find the index of the requested app (case insensitive)
-        const appIndex = loadedApps.findIndex(
-          (app) =>
-            app.name.toLowerCase().replace(/\s+/g, "") ===
-            appParam.toLowerCase().replace(/\s+/g, "")
-        );
-        if (appIndex !== -1) {
-          setCurrentApp(appIndex);
-          // Enable app lock mode and disable screensaver when app is specified in URL
-          setIsAppLocked(true);
-          setIsScreensaverActive(false);
+            loadedApps.push({
+              name: displayName,
+              component: <AppComponent />
+            });
+          } catch (error) {
+            console.warn(`Failed to load app: ${appName}.js`, error);
+          }
         }
+
+        setApps(loadedApps);
+
+        // Check for app parameter in URL
+        const params = new URLSearchParams(window.location.search);
+        const appParam = params.get("app");
+        if (appParam) {
+          // Find the index of the requested app (case insensitive)
+          const appIndex = loadedApps.findIndex(
+            (app) =>
+              app.name.toLowerCase().replace(/\s+/g, "") ===
+              appParam.toLowerCase().replace(/\s+/g, "")
+          );
+          if (appIndex !== -1) {
+            setCurrentApp(appIndex);
+            // Enable app lock mode and disable screensaver when app is specified in URL
+            setIsAppLocked(true);
+            setIsScreensaverActive(false);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load apps configuration:", error);
+        // Fallback to empty apps array
+        setApps([]);
       }
     };
 
