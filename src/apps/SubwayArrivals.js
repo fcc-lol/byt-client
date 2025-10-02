@@ -27,7 +27,8 @@ const Index = styled(Description)`
 const Bullet = styled.div`
   width: 8rem;
   height: 8rem;
-  border-radius: 50%;
+  border-radius: ${(props) => (props.isExpress ? "0" : "50%")};
+  transform: ${(props) => (props.isExpress ? "rotate(45deg)" : "none")};
   background-color: ${(props) => props.color || "#888"};
   display: flex;
   align-items: center;
@@ -36,6 +37,12 @@ const Bullet = styled.div`
   font-size: 5.25rem;
   flex-shrink: 0;
   font-family: "Helvetica", sans-serif;
+  position: relative;
+`;
+
+const RouteText = styled.span`
+  transform: ${(props) => (props.isExpress ? "rotate(-45deg)" : "none")};
+  font-size: 5.75rem;
 `;
 
 const Direction = styled(Label)`
@@ -174,11 +181,18 @@ const SubwayArrivals = () => {
     // Calculate the actual position in the sequence
     const position = isNext ? 1 : index + 1;
 
+    // Check if this is an express route (ends with X)
+    const isExpress = arrival.routeId.endsWith("X");
+    const baseRouteId = isExpress
+      ? arrival.routeId.slice(0, -1)
+      : arrival.routeId;
+    const routeColor = routeColors[baseRouteId] || "#888";
+
     return (
       <Sign>
         <Index>{position}</Index>
-        <Bullet color={routeColors[arrival.routeId] || "#888"}>
-          {arrival.routeId}
+        <Bullet color={routeColor} isExpress={isExpress}>
+          <RouteText isExpress={isExpress}>{arrival.routeId}</RouteText>
         </Bullet>
         <Direction>{arrival.headsign}</Direction>
         <Time>
