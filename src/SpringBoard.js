@@ -11,6 +11,7 @@ import Icon from "./components/Icon";
 import NotificationCenter from "./components/NotificationCenter";
 import LoadingCard from "./components/LoadingCard";
 import ErrorCard from "./components/ErrorCard";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const Body = styled.div`
   width: 100%;
@@ -555,7 +556,9 @@ function SpringBoard() {
         {showApiKeyError ? (
           <ErrorCard type="api-key" />
         ) : (
-          apps[currentApp].component
+          <ErrorBoundary key={currentApp} message={apps[currentApp].name}>
+            {apps[currentApp].component}
+          </ErrorBoundary>
         )}
       </AppContent>
       <AppSwitcherButton onClick={handleNext} $isDevice={isDevice}>
